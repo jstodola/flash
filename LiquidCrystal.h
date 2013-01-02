@@ -61,6 +61,9 @@ public:
     
   void begin(uint8_t cols, uint8_t rows, uint8_t charsize = LCD_5x8DOTS);
 
+  void begin_backlight(uint8_t backlight_pin, int value);
+  void set_backlight(int value);
+
   void clear();
   void home();
 
@@ -101,6 +104,8 @@ private:
   uint8_t _initialized;
 
   uint8_t _numlines,_currline;
+
+  uint8_t _backlight_pin;
 };
 
 #endif

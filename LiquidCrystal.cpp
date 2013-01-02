@@ -50,6 +50,16 @@ LiquidCrystal::LiquidCrystal(uint8_t rs,  uint8_t enable,
   init(1, rs, 255, enable, d0, d1, d2, d3, 0, 0, 0, 0);
 }
 
+void LiquidCrystal::begin_backlight(uint8_t backlight_pin, int value) {
+  _backlight_pin = backlight_pin;
+  pinMode(_backlight_pin, OUTPUT);
+  set_backlight(value);
+}
+
+void LiquidCrystal::set_backlight(int value) {
+  analogWrite(_backlight_pin, value);
+}
+
 void LiquidCrystal::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable,
 			 uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
 			 uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
