@@ -7,8 +7,16 @@ flash::flash(int pin) {
     this->pin = pin;
 }
 
-void flash::fire() {
+void flash::fire_start() {
     digitalWrite(this->pin, HIGH);
-    delay(50);
+}
+
+void flash::fire_finish() {
     digitalWrite(this->pin, LOW);
+}
+
+void flash::fire() {
+    fire_start();
+    delay(50);
+    fire_finish();
 }
