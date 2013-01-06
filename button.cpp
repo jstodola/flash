@@ -4,7 +4,7 @@
 button::button(int pin) {
     // default debounce time is 50 ms,
     // wait 1000 ms before repeating, repeat 4 times per second
-    init(pin, debounce_delay_def, repeat_delay_def, repeat_rete_def);
+    init(pin, debounce_delay_def, repeat_delay_def, repeat_rate_def);
 }
 
 button::button(int pin, int debounce_delay, int repeat_delay, int repeat_rate) {
@@ -87,4 +87,46 @@ int button::read() {
 
     this->last_stable_state = current_state;
     return return_state;
+}
+
+
+rotaryEncoder::rotaryEncoder(int pin_A, int pin_B) {
+    this->A = new button(pin_A);
+    this->B = new button(pin_B);
+    this->last_state_A = this->A->state();
+    this->last_state_B = this->B->state();
+}
+
+int rotaryEncoder::read() {
+    int current_state_A;
+    int current_state_B;
+    int return_state;
+
+    current_state_A = this->A->state();
+    current_state_B = this->B->state();
+
+    if(current_state_A == current_state_B) {
+        // B channel changed last
+        if(current_state_A == this->last_state_A &&
+           current_state_B != this->last_state_B) {
+            return_state = UP;
+        // A channel changed last
+        } else if(current_state_A != this->last_state_A &&
+                  current_state_B == this->last_state_B) {
+            return_state = DOWN;
+        // both or none channels changed
+        } else {
+            return_state = LOW;
+        }
+    }
+
+    this->last_state_A = current_state_A;
+    this->last_state_B = current_state_B;
+    return return_state;
+}
+
+
+rotaryEncoder::~rotaryEncoder() {
+    delete this->A;
+    delete this->B;
 }
