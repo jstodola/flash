@@ -61,8 +61,7 @@ button button_right(BUTTON_RIGHT_PIN);
 button button_ok(BUTTON_OK_PIN);
 button button_rc1(BUTTON_RC1_PIN);
 button button_rc2(BUTTON_RC2_PIN);
-button button_ch_a(ROT_CH_A_PIN);
-button button_ch_b(ROT_CH_B_PIN);
+rotaryEncoder rotary_button(ROT_CH_A_PIN, ROT_CH_B_PIN);
 
 camera camera_1(CAMERA_1_FOCUS_PIN, CAMERA_1_SHUTTER_PIN);
 camera camera_2(CAMERA_2_FOCUS_PIN, CAMERA_2_SHUTTER_PIN);
