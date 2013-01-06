@@ -2,8 +2,6 @@
 #include "button.h"
 
 button::button(int pin) {
-    // default debounce time is 50 ms,
-    // wait 1000 ms before repeating, repeat 4 times per second
     init(pin, debounce_delay_def, repeat_delay_def, repeat_rate_def);
 }
 
