@@ -3,7 +3,7 @@
 
 class camera {
   public:
-    camera(int focus_pin, int shutter_pin);
+    camera(uint8_t focus_pin, uint8_t shutter_pin);
     void focus_start();
     void focus_stop();
     void shutter_start();
@@ -11,8 +11,8 @@ class camera {
     void start();
     void stop();
   private:
-    int focus_pin;
-    int shutter_pin;
+    uint8_t focus_pin;
+    uint8_t shutter_pin;
 };
 
 #endif

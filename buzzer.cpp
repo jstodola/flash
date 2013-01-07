@@ -1,17 +1,17 @@
 #include <Arduino.h>
 #include "buzzer.h"
 
-buzzer::buzzer(int pin) {
+buzzer::buzzer(uint8_t pin) {
     pinMode(pin, OUTPUT);
     this->pin = pin;
     set_value(0);
 }
 
-void buzzer::set_value(int value) {
+void buzzer::set_value(uint8_t value) {
     analogWrite(this->pin, value);
     this->value = value;
 }
 
-int buzzer::get_value() {
+uint8_t buzzer::get_value() {
     return this->value;
 }

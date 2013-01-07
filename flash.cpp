@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "flash.h"
 
-flash::flash(int pin) {
+flash::flash(uint8_t pin) {
     pinMode(pin, OUTPUT);
     digitalWrite(this->pin, LOW);
     this->pin = pin;

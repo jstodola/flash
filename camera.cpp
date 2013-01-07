@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "camera.h"
 
-camera::camera(int focus_pin, int shutter_pin) {
+camera::camera(uint8_t focus_pin, uint8_t shutter_pin) {
 
     pinMode(focus_pin, OUTPUT);
     pinMode(shutter_pin, OUTPUT);

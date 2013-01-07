@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "digitalOutput.h"
 
-digitalOutput::digitalOutput(int pin) {
+digitalOutput::digitalOutput(uint8_t pin) {
     pinMode(pin, OUTPUT);
     this->pin = pin;
     off();

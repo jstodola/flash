@@ -3,11 +3,11 @@
 
 class digitalOutput {
   public:
-    digitalOutput(int pin);
+    digitalOutput(uint8_t pin);
     void on();
     void off();
   private:
-    int pin;
+    uint8_t pin;
 };
 
 #endif

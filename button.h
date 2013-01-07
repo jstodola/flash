@@ -1,40 +1,40 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-const int DOWN = 2;     // rotation button
-const int UP   = 3;
+const uint8_t DOWN = 2;     // rotation button
+const uint8_t UP   = 3;
 
 class button {
   public:
-    button(int pin,
+    button(uint8_t pin,
            int debounce_delay=50,   // 50 ms
            int repeat_delay=1000,   // 1000 ms
            int repeat_rate=4);      // 4 repeats per second
-    int state();
-    int read();
+    uint8_t state();
+    uint8_t read();
   private:
-    int pin;
-    int last_state;
-    int last_stable_state;
+    uint8_t pin;
+    uint8_t last_state;
+    uint8_t last_stable_state;
     unsigned long last_debounce_time;
     unsigned long returned_state_time;
     int debounce_delay;
-    int repeating;
+    uint8_t repeating;
     int repeat_delay;
     int repeat_rate;
 };
 
 class rotaryEncoder {
   public:
-    rotaryEncoder(int pin_A, int pin_B);
+    rotaryEncoder(uint8_t pin_A, uint8_t pin_B);
     ~rotaryEncoder();
-    int read();
+    uint8_t read();
   private:
     button *A;
     button *B;
-    int last_state_A;
-    int last_state_B;
-    int last_state;
+    uint8_t last_state_A;
+    uint8_t last_state_B;
+    uint8_t last_state;
 };
 
 #endif

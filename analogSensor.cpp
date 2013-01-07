@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "analogSensor.h"
 
-analogSensor::analogSensor(int pin) {
+analogSensor::analogSensor(uint8_t pin) {
     pinMode(pin, INPUT);
     this->pin = pin;
     this->min_value = 0;

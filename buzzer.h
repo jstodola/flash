@@ -3,12 +3,12 @@
 
 class buzzer {
   public:
-    buzzer(int pin);
-    void set_value(int value);
-    int get_value();
+    buzzer(uint8_t pin);
+    void set_value(uint8_t value);
+    uint8_t get_value();
   private:
-    int pin;
-    int value;
+    uint8_t pin;
+    uint8_t value;
 };
 
 #endif

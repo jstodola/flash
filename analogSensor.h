@@ -3,13 +3,13 @@
 
 class analogSensor {
   public:
-    analogSensor(int pin);
+    analogSensor(uint8_t pin);
     int get_value();
     void calibrate(unsigned long delay);
     int get_minimal();
     int get_maximal();
   private:
-    int pin;
+    uint8_t pin;
     int min_value;
     int max_value;
 };

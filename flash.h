@@ -3,12 +3,12 @@
 
 class flash {
   public:
-    flash(int pin);
+    flash(uint8_t pin);
     void fire_start();
     void fire_finish();
     void fire();
   private:
-    int pin;
+    uint8_t pin;
 };
 
 #endif

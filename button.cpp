@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include "button.h"
 
-button::button(int pin, int debounce_delay, int repeat_delay, int repeat_rate) {
+button::button(uint8_t pin, int debounce_delay, int repeat_delay, int repeat_rate) {
     
-    int button_state;
+    uint8_t button_state;
     unsigned long now;
     
     pinMode(pin, INPUT);
@@ -23,10 +23,10 @@ button::button(int pin, int debounce_delay, int repeat_delay, int repeat_rate) {
 }
 
 // returns state of button after debouncing
-int button::state() {
+uint8_t button::state() {
 
-    int button_state;
-    int reading;
+    uint8_t button_state;
+    uint8_t reading;
 
     reading = digitalRead(this->pin);
     if(reading != this->last_state) {
@@ -45,10 +45,10 @@ int button::state() {
 
 // returns one HIGH value for each key press, also send HIGH for repeating
 // events when key is pressed for a long time
-int button::read() {
+uint8_t button::read() {
     
-    int current_state;
-    int return_state = LOW;
+    uint8_t current_state;
+    uint8_t return_state = LOW;
     int event_delay;
     unsigned long now;
 
@@ -80,17 +80,17 @@ int button::read() {
 }
 
 
-rotaryEncoder::rotaryEncoder(int pin_A, int pin_B) {
+rotaryEncoder::rotaryEncoder(uint8_t pin_A, uint8_t pin_B) {
     this->A = new button(pin_A);
     this->B = new button(pin_B);
     this->last_state_A = this->A->state();
     this->last_state_B = this->B->state();
 }
 
-int rotaryEncoder::read() {
-    int current_state_A;
-    int current_state_B;
-    int return_state = 0;
+uint8_t rotaryEncoder::read() {
+    uint8_t current_state_A;
+    uint8_t current_state_B;
+    uint8_t return_state = 0;
 
     current_state_A = this->A->state();
     current_state_B = this->B->state();
