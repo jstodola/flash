@@ -1,15 +1,7 @@
 #include <Arduino.h>
 #include "button.h"
 
-button::button(int pin) {
-    init(pin, debounce_delay_def, repeat_delay_def, repeat_rate_def);
-}
-
 button::button(int pin, int debounce_delay, int repeat_delay, int repeat_rate) {
-    init(pin, debounce_delay, repeat_delay, repeat_rate);
-}
-
-void button::init(int pin, int debounce_delay, int repeat_delay, int repeat_rate) {
     
     int button_state;
     unsigned long now;
@@ -98,7 +90,7 @@ rotaryEncoder::rotaryEncoder(int pin_A, int pin_B) {
 int rotaryEncoder::read() {
     int current_state_A;
     int current_state_B;
-    int return_state;
+    int return_state = 0;
 
     current_state_A = this->A->state();
     current_state_B = this->B->state();
