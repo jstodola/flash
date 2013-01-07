@@ -60,6 +60,14 @@ void LiquidCrystal::set_backlight(int value) {
   analogWrite(_backlight_pin, value);
 }
 
+uint8_t LiquidCrystal::get_columns() {
+    return _numcols;
+}
+
+uint8_t LiquidCrystal::get_rows() {
+    return _numlines;
+}
+
 void LiquidCrystal::init(uint8_t fourbitmode, uint8_t rs, uint8_t rw, uint8_t enable,
 			 uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
 			 uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7)
@@ -97,6 +105,7 @@ void LiquidCrystal::begin(uint8_t cols, uint8_t lines, uint8_t dotsize) {
     _displayfunction |= LCD_2LINE;
   }
   _numlines = lines;
+  _numcols = cols;
   _currline = 0;
 
   // for some 1 line displays you can select a 10 pixel high font

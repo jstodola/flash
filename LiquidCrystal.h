@@ -63,6 +63,8 @@ public:
 
   void begin_backlight(uint8_t backlight_pin, int value);
   void set_backlight(int value);
+  uint8_t get_columns();
+  uint8_t get_rows();
 
   void clear();
   void home();
@@ -104,6 +106,7 @@ private:
   uint8_t _initialized;
 
   uint8_t _numlines,_currline;
+  uint8_t _numcols;
 
   uint8_t _backlight_pin;
 };
