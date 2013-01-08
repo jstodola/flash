@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <stdio.h>
-#include "LiquidCrystal.h"
+
+#include "display.h"
 #include "button.h"
 #include "camera.h"
 #include "flash.h"
@@ -52,7 +53,7 @@ const int OUTPUT_2_5V_PIN  = 48;
 const int OUTPUT_3_5V_PIN  = 50;
 
 
-LiquidCrystal lcd(LCD_RS_PIN, LCD_ENABLE_PIN, LCD_DB4_PIN, LCD_DB5_PIN, LCD_DB6_PIN, LCD_DB7_PIN);
+display lcd(LCD_RS_PIN, LCD_ENABLE_PIN, LCD_DB4_PIN, LCD_DB5_PIN, LCD_DB6_PIN, LCD_DB7_PIN);
 
 button button_up(BUTTON_UP_PIN);
 button button_down(BUTTON_DOWN_PIN);

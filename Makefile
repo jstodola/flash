@@ -61,7 +61,7 @@ AVRDUDE_PORT:=/dev/ttyACM0
 # List of all libaries which should be included.
 #EXTRA_DIRS+=/home/kraus/src/arduino/dogm128/hg/libraries/Dogm/
 #EXTRA_DIRS=$(ARDUINO_PATH)libraries/Ultrasonic/
-#EXTRA_DIRS=$(ARDUINO_PATH)libraries/LiquidCrystal/
+EXTRA_DIRS=$(ARDUINO_PATH)libraries/LiquidCrystal/
 
 #=== fetch parameter from boards.txt processor parameter ===
 # the basic idea is to get most of the information from boards.txt
