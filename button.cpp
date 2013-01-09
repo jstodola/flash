@@ -103,11 +103,11 @@ uint8_t rotaryEncoder::read() {
         // B channel changed last
         if(current_state_A == this->last_state_A &&
            current_state_B != this->last_state_B) {
-            return_state = this->return_value_down;
+            return_state = this->return_value_up;
         // A channel changed last
         } else if(current_state_A != this->last_state_A &&
                   current_state_B == this->last_state_B) {
-            return_state = this->return_value_up;
+            return_state = this->return_value_down;
         // both or none channels changed
         } else {
             return_state = IDLE;
