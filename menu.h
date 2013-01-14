@@ -5,10 +5,6 @@ class subMenu;
 class menuLeaf;
 
 class menuItem {
-    const prog_char *_label;
-    menuItem *_parent;
-    menuItem *_previous;
-    menuItem *_next;
   public:
     menuItem(const prog_char *label);
     virtual void get_label(char *buffer);
@@ -22,6 +18,11 @@ class menuItem {
     virtual menuItem* do_action();
     uint8_t count_next();
     uint8_t count_previous();
+  private:
+    const prog_char *_label;
+    menuItem *_parent;
+    menuItem *_previous;
+    menuItem *_next;
 };
 
 class menuLeaf : public menuItem {
@@ -50,26 +51,28 @@ class checkItem : public radioItem {
 };
 
 class subMenu : public menuItem {
-    menuItem *_first;
-    menuItem *_last;
   public:
     subMenu(const prog_char *label);
     virtual void append(menuItem &new_item);
     virtual menuItem* get_first();
     virtual menuItem* do_action();
+  private:
+    menuItem *_first;
+    menuItem *_last;
 };
 
 class menuCore : public subMenu {
-    display *_lcd;
-    menuItem *_selected_item;
-    uint8_t _last_move;
-    uint8_t _last_lcd_row;
   public:
     menuCore();
     void append(menuItem &new_item);
     void attach_display(display &lcd);
     void print();
     void action(uint8_t move);
+  private:
+    display *_lcd;
+    menuItem *_selected_item;
+    uint8_t _last_move;
+    uint8_t _last_lcd_row;
 };
 
 #endif
