@@ -69,6 +69,49 @@ uint8_t menuItem::count_previous() {
 menuLeaf::menuLeaf(const prog_char *label) : menuItem(label) {
 }
 
+radioItem::radioItem(const prog_char *label, uint8_t *variable, uint8_t value) : menuItem(label) {
+    _variable = variable;
+    _value = value;
+}
+
+uint8_t radioItem::is_selected() {
+    if(*_variable == _value) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+void radioItem::get_label(char *buffer) {
+    buffer[0] = ' ';
+    if(is_selected()) {
+        buffer[0] = '*';
+    }
+    menuItem::get_label(buffer + 1) ;
+}
+
+menuItem* radioItem::do_action() {
+    *_variable = _value;
+    return 0;
+}
+
+checkItem::checkItem(const prog_char *label, uint8_t *variable, uint8_t value) : radioItem(label, variable, value){
+}
+
+uint8_t checkItem::is_selected() {
+    if(*_variable & _value) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+menuItem* checkItem::do_action() {
+    *_variable = *_variable ^ _value; // toggle
+    return 0;
+}
+
+
 subMenu::subMenu(const prog_char *label) : menuItem(label) {
     _first = 0;
     _last = 0;

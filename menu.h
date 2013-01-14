@@ -11,7 +11,7 @@ class menuItem {
     menuItem *_next;
   public:
     menuItem(const prog_char *label);
-    void get_label(char *buffer);
+    virtual void get_label(char *buffer);
     void set_parent(menuItem *parent);
     void set_next(menuItem &next_item);
     void set_previous(menuItem &previous_item);
@@ -29,14 +29,34 @@ class menuLeaf : public menuItem {
     menuLeaf(const prog_char *label);
 };
 
+class radioItem : public menuItem {
+  friend class checkItem;
+  public:
+    radioItem(const prog_char *label, uint8_t *variable, uint8_t value);
+    virtual void get_label(char *buffer);
+    virtual menuItem* do_action();
+  private:
+    virtual uint8_t is_selected();
+    uint8_t *_variable;
+    uint8_t _value;
+};
+
+class checkItem : public radioItem {
+  public:
+    checkItem(const prog_char *label, uint8_t *variable, uint8_t value);
+    virtual menuItem* do_action();
+  private:
+    virtual uint8_t is_selected();
+};
+
 class subMenu : public menuItem {
     menuItem *_first;
     menuItem *_last;
   public:
     subMenu(const prog_char *label);
     virtual void append(menuItem &new_item);
-    menuItem* get_first();
-    menuItem* do_action();
+    virtual menuItem* get_first();
+    virtual menuItem* do_action();
 };
 
 class menuCore : public subMenu {
