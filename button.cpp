@@ -2,6 +2,21 @@
 #include "button.h"
 #include "common.h"
 
+buttonCore::buttonCore() {
+}
+
+buttonCore *buttonCore::get_next_button() {
+    return _next_button;
+}
+
+void buttonCore::set_next_button(buttonCore &next_button) {
+    _next_button = &next_button;
+}
+
+uint8_t buttonCore::read() {
+    return 0;
+}
+
 button::button(uint8_t pin, uint8_t return_value, int debounce_delay, int repeat_delay, int repeat_rate) {
     
     uint8_t button_state;
@@ -123,4 +138,35 @@ uint8_t rotaryEncoder::read() {
 rotaryEncoder::~rotaryEncoder() {
     delete this->A;
     delete this->B;
+}
+
+buttonsReader::buttonsReader() {
+    _first = 0;
+    _last = 0;
+}
+
+void buttonsReader::add_button(buttonCore &new_button) {
+    // adding first button
+    if(_first == 0) {
+        _first = &new_button;
+        _last = &new_button;
+    } else {
+        _last->set_next_button(new_button);
+        _last = &new_button;
+    }
+}
+
+uint8_t buttonsReader::read() {
+    buttonCore *tmp;
+    uint8_t button_state;
+
+    tmp = _first;
+    while(tmp) {
+        button_state = tmp->read();
+        if(button_state) {
+            return button_state;
+        }
+        tmp = tmp->get_next_button();
+    }
+    return button_state;
 }

@@ -1,7 +1,17 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-class button {
+class buttonCore {
+  public:
+    buttonCore();
+    virtual buttonCore* get_next_button();
+    virtual void set_next_button(buttonCore &next_button);
+    virtual uint8_t read();
+  private:
+    buttonCore *_next_button;
+};
+
+class button : public buttonCore {
   public:
     button(uint8_t pin,
            uint8_t return_value=1,  // return value when pressed
@@ -23,7 +33,7 @@ class button {
     uint8_t return_value;
 };
 
-class rotaryEncoder {
+class rotaryEncoder : public buttonCore {
   public:
     rotaryEncoder(uint8_t pin_A,
                   uint8_t pin_B,
@@ -39,6 +49,16 @@ class rotaryEncoder {
     uint8_t last_state;
     uint8_t return_value_up;
     uint8_t return_value_down;
+};
+
+class buttonsReader {
+  public:
+    buttonsReader();
+    void add_button(buttonCore &new_button);
+    uint8_t read();
+  private:
+    buttonCore *_first;
+    buttonCore *_last;
 };
 
 #endif
