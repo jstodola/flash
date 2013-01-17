@@ -3,6 +3,7 @@
 
 class subMenu;
 class menuLeaf;
+class menuCore;
 
 class menuItem {
   public:
@@ -11,10 +12,12 @@ class menuItem {
     void set_parent(menuItem *parent);
     void set_next(menuItem &next_item);
     void set_previous(menuItem &previous_item);
+    void set_root_menu(menuCore *root_menu);
     virtual menuItem* get_first();
     menuItem* get_next();
     menuItem* get_previous();
     menuItem* get_parent();
+    menuCore* get_root_menu();
     virtual menuItem* do_action();
     uint8_t count_next();
     uint8_t count_previous();
@@ -23,11 +26,43 @@ class menuItem {
     menuItem *_parent;
     menuItem *_previous;
     menuItem *_next;
+    menuCore *_root_menu;
 };
 
 class menuLeaf : public menuItem {
   public:
     menuLeaf(const prog_char *label);
+};
+
+class menuDialog : public menuLeaf {
+  public:
+    menuDialog(const prog_char *label, const prog_char *question);
+    virtual display* get_display();
+    virtual void get_question(char *buffer);
+  private:
+    const prog_char *_question;
+};
+
+class enterNumberItem : public menuDialog {
+  public:
+    enterNumberItem(const prog_char *label,
+                    const prog_char *question,
+                    int *variable);
+    virtual menuItem* do_action();
+  private:
+    const prog_char *_question;
+    int *_variable;
+};
+
+class subMenu : public menuItem {
+  public:
+    subMenu(const prog_char *label);
+    virtual void append(menuItem &new_item);
+    virtual menuItem* get_first();
+    virtual menuItem* do_action();
+  private:
+    menuItem *_first;
+    menuItem *_last;
 };
 
 class radioItem : public menuItem {
@@ -50,22 +85,12 @@ class checkItem : public radioItem {
     virtual uint8_t is_selected();
 };
 
-class subMenu : public menuItem {
-  public:
-    subMenu(const prog_char *label);
-    virtual void append(menuItem &new_item);
-    virtual menuItem* get_first();
-    virtual menuItem* do_action();
-  private:
-    menuItem *_first;
-    menuItem *_last;
-};
-
 class menuCore : public subMenu {
   public:
     menuCore();
     void append(menuItem &new_item);
     void attach_display(display &lcd);
+    virtual display *get_display();
     void print();
     void action(uint8_t move);
   private:

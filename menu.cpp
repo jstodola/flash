@@ -1,13 +1,20 @@
+#include <Arduino.h>
 #include <avr/pgmspace.h>
 #include "common.h"
 #include "display.h"
 #include "menu.h"
+#include "button.h"
 
+extern buttonsReader buttons_reader;
+char buffer[30];
+
+// menuItem
 menuItem::menuItem(const prog_char *label) {
     _label = label;
     _parent = 0;
     _previous = 0;
     _next = 0;
+    _root_menu = 0;
 }
 
 void menuItem::get_label(char *buffer) {
@@ -26,6 +33,10 @@ void menuItem::set_previous(menuItem &previous_item) {
     _previous = &previous_item;
 }
 
+void menuItem::set_root_menu(menuCore *root_menu) {
+    _root_menu = root_menu;
+}
+
 menuItem* menuItem::get_first() {
     return this;
 }
@@ -40,6 +51,10 @@ menuItem* menuItem::get_previous() {
 
 menuItem* menuItem::get_parent() {
     return _parent;
+}
+
+menuCore* menuItem::get_root_menu() {
+    return _root_menu;
 }
 
 menuItem* menuItem::do_action() {
@@ -66,9 +81,85 @@ uint8_t menuItem::count_previous() {
     return count;
 }
 
+// menuLeaf
 menuLeaf::menuLeaf(const prog_char *label) : menuItem(label) {
 }
 
+// menuDialog
+menuDialog::menuDialog(const prog_char *label, const prog_char *question) : menuLeaf(label) {
+    _question = question;
+}
+
+display* menuDialog::get_display() {
+    menuItem *tmp;
+    display *lcd;
+    
+    // first we need to find lcd - go up through menu items
+    tmp = this;
+    while(tmp->get_parent()) {
+        tmp = tmp->get_parent();
+    }
+    // items in root menu don't have parrents, but knows root menu item with lcd
+    lcd = tmp->get_root_menu()->get_display();
+    
+    return lcd;
+}
+
+void menuDialog::get_question(char *buffer) {
+    strcpy_P(buffer, _question);
+}
+
+// enterNumberItem
+enterNumberItem::enterNumberItem(const prog_char *label,
+                                 const prog_char *question,
+                                 int *variable) : menuDialog(label, question) {
+    _variable = variable;
+}
+
+menuItem* enterNumberItem::do_action() {
+    display *lcd;
+    int value;
+    uint8_t button;
+
+    lcd = get_display();
+    get_question(buffer);
+    value = *_variable;
+
+    uint8_t character;
+    int i,j;
+
+    do {
+        lcd->clear();
+        lcd->print(buffer);
+        
+        lcd->setCursor(0, 2);
+        lcd->print(value);
+        
+        // wait for some useful key
+        do{
+            button = buttons_reader.read();
+        } while(button == IDLE);
+
+        if(button == UP) {
+            value++;
+        } else if(button == DOWN) {
+            value--;
+            if(value < 0) {
+                value = 0;
+            }
+        }
+
+    } while(button == UP || button == DOWN);
+    
+    // if not "cancel", save value
+    if(button != LEFT) {
+        *_variable = value;
+    }
+
+    return 0;
+}
+
+// radioItem
 radioItem::radioItem(const prog_char *label, uint8_t *variable, uint8_t value) : menuItem(label) {
     _variable = variable;
     _value = value;
@@ -95,6 +186,7 @@ menuItem* radioItem::do_action() {
     return 0;
 }
 
+// checkItem
 checkItem::checkItem(const prog_char *label, uint8_t *variable, uint8_t value) : radioItem(label, variable, value){
 }
 
@@ -111,7 +203,7 @@ menuItem* checkItem::do_action() {
     return 0;
 }
 
-
+// subMenu
 subMenu::subMenu(const prog_char *label) : menuItem(label) {
     _first = 0;
     _last = 0;
@@ -138,10 +230,13 @@ menuItem* subMenu::do_action() {
     return get_first();
 }
 
+// menuCore
 void menuCore::append(menuItem &new_item) {
     subMenu::append(new_item);
     // items in root menu don't have parent
     new_item.set_parent(0);
+    // but know root menu
+    new_item.set_root_menu(this);
 }
 
 menuCore::menuCore() : subMenu(0){
@@ -153,6 +248,10 @@ menuCore::menuCore() : subMenu(0){
 
 void menuCore::attach_display(display &lcd) {
     _lcd = &lcd;
+}
+
+display* menuCore::get_display() {
+    return _lcd;
 }
 
 void menuCore::action(uint8_t move) {
@@ -188,7 +287,6 @@ void menuCore::action(uint8_t move) {
 }
 
 void menuCore::print() {
-    char buffer[30];
     menuItem* tmp;
     uint8_t lcd_rows;
     uint8_t previous_items;
