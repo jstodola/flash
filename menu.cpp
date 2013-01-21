@@ -159,6 +159,63 @@ menuItem* enterNumberItem::do_action() {
     return 0;
 }
 
+// yesNoItem
+yesNoItem::yesNoItem(const prog_char *label,
+                     const prog_char *question,
+                     uint8_t *variable) : menuDialog(label, question) {
+    _variable = variable;
+}
+
+menuItem* yesNoItem::do_action() {
+    display *lcd;
+    uint8_t value;
+    uint8_t button;
+
+    lcd = get_display();
+    value = *_variable;
+
+    do {
+        lcd->clear();
+        get_question(buffer);
+        lcd->print(buffer);
+        
+        if(value) {
+            strcpy_P(buffer, yes_sel);
+        } else {
+            strcpy_P(buffer, yes_unsel);
+        }
+        lcd->setCursor(0, 2);
+        lcd->print(buffer);
+ 
+        if(value) {
+            strcpy_P(buffer, no_unsel);
+        } else {
+            strcpy_P(buffer, no_sel);
+        }
+        lcd->setCursor(0, 3);
+        lcd->print(buffer);
+        
+        // wait for some useful key
+        do{
+            button = buttons_reader.read();
+        } while(button == IDLE);
+
+        if(button == UP) {
+            value = 1;
+        } else if(button == DOWN) {
+            value = 0;
+        }
+
+    } while(button == UP || button == DOWN);
+    
+    // if not "cancel", save value
+    if(button != LEFT) {
+        *_variable = value;
+    }
+
+    return 0;
+}
+
 // radioItem
 radioItem::radioItem(const prog_char *label, uint8_t *variable, uint8_t value) : menuItem(label) {
     _variable = variable;

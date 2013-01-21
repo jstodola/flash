@@ -5,6 +5,11 @@ class subMenu;
 class menuLeaf;
 class menuCore;
 
+PROGMEM const prog_char yes_sel[]   = "> YES <";
+PROGMEM const prog_char yes_unsel[] = "  YES";
+PROGMEM const prog_char no_sel[]    = "> NO  <";
+PROGMEM const prog_char no_unsel[]  = "  NO";
+
 class menuItem {
   public:
     menuItem(const prog_char *label);
@@ -52,6 +57,17 @@ class enterNumberItem : public menuDialog {
   private:
     const prog_char *_question;
     int *_variable;
+};
+
+class yesNoItem : public menuDialog {
+  public:
+    yesNoItem(const prog_char *label,
+              const prog_char *question,
+              uint8_t *variable);
+    virtual menuItem* do_action();
+  private:
+    const prog_char *_question;
+    uint8_t *_variable;
 };
 
 class subMenu : public menuItem {
