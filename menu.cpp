@@ -125,9 +125,6 @@ menuItem* enterNumberItem::do_action() {
     get_question(buffer);
     value = *_variable;
 
-    uint8_t character;
-    int i,j;
-
     do {
         lcd->clear();
         lcd->print(buffer);
