@@ -25,6 +25,7 @@ class button : public buttonCore {
     uint8_t last_state;
     uint8_t last_stable_state;
     unsigned long last_debounce_time;
+    unsigned long last_query_time;
     unsigned long returned_state_time;
     int debounce_delay;
     uint8_t repeating;

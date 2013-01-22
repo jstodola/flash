@@ -31,6 +31,7 @@ button::button(uint8_t pin, uint8_t return_value, int debounce_delay, int repeat
     this->last_stable_state = button_state;
     this->pin = pin;
     this->last_debounce_time = now;
+    this->last_query_time = now;
     this->returned_state_time = now;
     this->debounce_delay = debounce_delay;
     this->repeat_delay = repeat_delay;
@@ -44,19 +45,30 @@ uint8_t button::state() {
 
     uint8_t button_state;
     uint8_t reading;
+    unsigned long now;
+
+    now = millis();
 
     reading = digitalRead(this->pin);
+
     if(reading != this->last_state) {
-        this->last_debounce_time = millis();
+        this->last_debounce_time = now;
     }
 
-    if((int)(millis() - this->last_debounce_time) > this->debounce_delay) {
+    if((int)(now - this->last_debounce_time) > this->debounce_delay) {
         button_state = reading;
     }else {
         button_state = this->last_state;
     }
 
+    // we didn't ask for a long time, previous state is unknown
+    if(this->last_query_time + this->debounce_delay < now) {
+        this->last_debounce_time = now;
+        button_state = LOW;
+    }
+
     this->last_state = reading;
+    this->last_query_time = now;
     return(button_state ? this->return_value : IDLE);
 }
 
