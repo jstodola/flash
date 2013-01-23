@@ -85,6 +85,16 @@ uint8_t menuItem::count_previous() {
 menuLeaf::menuLeaf(const prog_char *label) : menuItem(label) {
 }
 
+// menuRun
+menuRun::menuRun(const prog_char *label, callback_function f) : menuLeaf(label) {
+    _f = f;
+}
+
+menuItem* menuRun::do_action() {
+    _f();
+    return 0;
+}
+
 // menuDialog
 menuDialog::menuDialog(const prog_char *label, const prog_char *question) : menuLeaf(label) {
     _question = question;
