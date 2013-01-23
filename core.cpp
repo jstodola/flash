@@ -12,6 +12,10 @@
 #include "digitalOutput.h"
 #include "menu.h"
 
+void run();
+void write_config();
+void read_config();
+
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
 const uint8_t LCD_ENABLE_PIN = 25;
@@ -61,6 +65,29 @@ const uint8_t MODE_LIGHT    = 2;
 const uint8_t MODE_PRESSURE = 3;
 const uint8_t MODE_IR       = 4;
 
+// strings in program memory
+PROGMEM const prog_char str_start[] = "Start";
+PROGMEM const prog_char str_mode[] = "Mode...";
+PROGMEM const prog_char str_settings[] = "Settings...";
+PROGMEM const prog_char str_save_defaults[] = "Save as default";
+
+// mode
+PROGMEM const prog_char str_mode_sound[]    = "Sound (microphone)";
+PROGMEM const prog_char str_mode_light[]    = "Light";
+PROGMEM const prog_char str_mode_pressure[] = "Pressure (piezo)";
+PROGMEM const prog_char str_mode_ir[]       = "IR (Infrared)";
+
+// settings
+PROGMEM const prog_char str_flash_delay[]  = "Flash delay";
+PROGMEM const prog_char str_flash_delay2[] = "Flash delay [ms]";
+PROGMEM const prog_char str_start_delay[]  = "Start delay";
+PROGMEM const prog_char str_start_delay2[] = "Start delay [s]";
+
+PROGMEM const prog_char str_ok[] = "OK";
+PROGMEM const prog_char str_waiting[] = "Waiting... ";
+PROGMEM const prog_char str_calibrating_sensor[] = "Calibrating sensor...";
+
+
 display lcd(LCD_RS_PIN, LCD_ENABLE_PIN, LCD_DB4_PIN, LCD_DB5_PIN, LCD_DB6_PIN, LCD_DB7_PIN);
 
 button button_up(BUTTON_UP_PIN, UP);
@@ -98,47 +125,10 @@ digitalOutput output_2_5v(OUTPUT_2_5V_PIN);
 digitalOutput output_3_5v(OUTPUT_3_5V_PIN);
 
 
-PROGMEM const prog_char str_mode[] = "Mode...";
-PROGMEM const prog_char str_settings[] = "Settings...";
-PROGMEM const prog_char str_save_defaults[] = "Save as default";
-PROGMEM const prog_char str_yesno[] = "Yes or no";
-PROGMEM const prog_char str_yesno2[] = "Really yes or no?";
-
-// mode
-PROGMEM const prog_char str_mode_sound[]    = "Sound (microphone)";
-PROGMEM const prog_char str_mode_light[]    = "Light";
-PROGMEM const prog_char str_mode_pressure[] = "Pressure (piezo)";
-PROGMEM const prog_char str_mode_ir[]       = "IR (Infrared)";
-
-// settings
-PROGMEM const prog_char str_flash_delay[]  = "Flash delay";
-PROGMEM const prog_char str_flash_delay2[] = "Flash delay [ms]";
-PROGMEM const prog_char str_start_delay[]  = "Start delay";
-PROGMEM const prog_char str_start_delay2[] = "Start delay [s]";
-
-PROGMEM const prog_char str_settings_1[] = "settings 1";
-PROGMEM const prog_char str_settings_2[] = "settings 2";
-PROGMEM const prog_char str_settings_3[] = "settings 3";
-PROGMEM const prog_char str_settings_4[] = "settings 4";
-PROGMEM const prog_char str_settings_5[] = "settings 5";
-PROGMEM const prog_char str_settings_6[] = "settings 6";
-PROGMEM const prog_char str_settings_7[] = "settings 7";
-PROGMEM const prog_char str_settings_8[] = "settings 8";
-
-
-PROGMEM const prog_char str_done[] = "Done";
-PROGMEM const prog_char str_ok[] = "OK";
-PROGMEM const prog_char str_waiting[] = "Waiting... ";
-PROGMEM const prog_char str_calibrating_sensor[] = "Calibrating sensor...";
-
-uint8_t mode;
-uint8_t yes_no;
-
-int var = 10;
-
 struct configuration {
     int flash_delay;
     int start_delay;
+    uint8_t mode;
 };
 
 struct configuration config;
@@ -146,32 +136,25 @@ struct configuration config;
 char buffer[30];
 
 menuCore menu;
+menuRun menu_start(str_start, run);
 subMenu menu_mode(str_mode);
-  radioItem mode_sound(str_mode_sound, &mode, MODE_SOUND);
-  radioItem mode_light(str_mode_light, &mode, MODE_LIGHT);
-  radioItem mode_pressure(str_mode_pressure, &mode, MODE_PRESSURE);
-  radioItem mode_ir(str_mode_ir, &mode, MODE_IR);
+  radioItem mode_sound(str_mode_sound, &config.mode, MODE_SOUND);
+  radioItem mode_light(str_mode_light, &config.mode, MODE_LIGHT);
+  radioItem mode_pressure(str_mode_pressure, &config.mode, MODE_PRESSURE);
+  radioItem mode_ir(str_mode_ir, &config.mode, MODE_IR);
 
 subMenu menu_settings(str_settings);
-  enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &(config.flash_delay));
-  enterNumberItem start_delay(str_start_delay, str_start_delay2, &(config.start_delay));
-  menuLeaf settings_1(str_settings_1);
-  menuLeaf settings_2(str_settings_2);
-  menuLeaf settings_3(str_settings_3);
-  menuLeaf settings_4(str_settings_4);
-  menuLeaf settings_5(str_settings_5);
-  menuLeaf settings_6(str_settings_6);
-  menuLeaf settings_7(str_settings_7);
-  menuLeaf settings_8(str_settings_8);
+  enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
+  enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
 
-yesNoItem yes_or_no(str_yesno, str_yesno2, &yes_no);
+menuRun save_defaults(str_save_defaults, write_config);
 
-menuLeaf save_defaults(str_save_defaults);
-
+// TODO
 void read_config() {
 
 }
 
+// TODO
 void write_config() {
 
 }
@@ -185,7 +168,7 @@ void run() {
 
     analogSensor *sensor;
     
-    switch(mode) {
+    switch(config.mode) {
         case MODE_SOUND:
             sensor = &sound_sensor;
             break;
@@ -229,7 +212,6 @@ void run() {
     lcd.set_backlight(0);
     
     camera_1.start();
-    camera_2.start();
 
     while(1) {
         sensor_value = sensor->get_value();
@@ -239,24 +221,25 @@ void run() {
             }
             flash_1.fire();
             break;
-        } else if(button_rc1.read()) {
+        }
+        
+        // action canceled by user
+        if(button_rc1.read()) {
             break;
         }
     }
 
     camera_1.stop();
-    camera_2.stop();
 
     lcd.set_backlight(63);
     // turn on light
     socket.off();
-    
-    lcd.clear();
-    strcpy_P(buffer, str_done);
-    lcd.print(buffer);
 }
 
 void setup() {
+
+    read_config();
+
     lcd.begin(20, 4);
     lcd.begin_backlight(LCD_LED_PIN, 63);
 
@@ -269,14 +252,14 @@ void setup() {
     buttons_reader.add_button(button_rc2);
     buttons_reader.add_button(rotary_button);
 
-    mode = MODE_SOUND;
-    yes_no = 0;
+    config.mode = MODE_SOUND;
     
     menu.attach_display(lcd);
+
+    menu.append(menu_start);
     menu.append(menu_mode);
     menu.append(menu_settings);
     menu.append(save_defaults);
-    menu.append(yes_or_no);
     
     menu_mode.append(mode_sound);
     menu_mode.append(mode_light);
@@ -285,14 +268,6 @@ void setup() {
 
     menu_settings.append(flash_delay);
     menu_settings.append(start_delay);
-    menu_settings.append(settings_1);
-    menu_settings.append(settings_2);
-    menu_settings.append(settings_3);
-    menu_settings.append(settings_4);
-    menu_settings.append(settings_5);
-    menu_settings.append(settings_6);
-    menu_settings.append(settings_7);
-    menu_settings.append(settings_8);
     
     menu.print();
 
@@ -305,11 +280,10 @@ void loop() {
     
     if(button_pressed == RC1) {
         run();
-    } else if(button_pressed) {
+    }
+    if(button_pressed) {
         menu.action(button_pressed);
     }
-
-
 }
 
 int main(void) {
