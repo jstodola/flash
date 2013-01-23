@@ -6,7 +6,7 @@
 #include "button.h"
 
 extern buttonsReader buttons_reader;
-char buffer[30];
+extern char buffer[];
 
 // menuItem
 menuItem::menuItem(const prog_char *label) {
