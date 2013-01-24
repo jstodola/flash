@@ -83,8 +83,6 @@ AVRDUDE_UPLOAD_RATE:=$(shell sed -n -e "s/$(BOARD).upload.speed=\(.*\)/\1/p" $(B
 AVRDUDE_PROGRAMMER:=stk500v2
 
 #=== identify user files ===
-PDESRC:=$(shell ls *.pde)
-TARGETNAME=$(basename $(PDESRC))
 
 CDIRS:=$(EXTRA_DIRS) $(addsuffix utility/,$(EXTRA_DIRS))
 CDIRS:=*.c utility/*.c $(addsuffix *.c,$(CDIRS)) $(ARDUINO_PATH)hardware/arduino/cores/arduino/*.c
@@ -198,18 +196,11 @@ $(TMPDIRPATH)%.s: %.cpp
 $(TMPDIRPATH)%.dis: $(TMPDIRPATH)%.o
 	@$(OBJDUMP) -S $< > $@
 
-.SUFFIXES: .elf .hex .pde
+.SUFFIXES: .elf .hex
 
 .elf.hex:
 	@$(OBJCOPY) -O ihex -R .eeprom $< $@
 	
-$(TMPDIRPATH)%.cpp: %.pde
-	@cat $(ARDUINO_PATH)hardware/arduino/cores/arduino/main.cpp > $@
-	@cat $< >> $@
-	@echo >> $@
-	@echo 'extern "C" void __cxa_pure_virtual() { while (1); }' >> $@
-
-
 .PHONY: all
 all: tmpdir $(HEXNAME) assemblersource showsize
 	ls -al $(HEXNAME) $(ELFNAME)
