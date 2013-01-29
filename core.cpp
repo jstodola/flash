@@ -206,7 +206,7 @@ void run() {
     
     // turn off light
     socket.on();
-    delay(500);
+    delay(1000);
 
     // turn off display
     lcd.set_backlight(0);
@@ -230,6 +230,8 @@ void run() {
     }
 
     camera_1.stop();
+
+    delay(500);
 
     lcd.set_backlight(63);
     // turn on light
