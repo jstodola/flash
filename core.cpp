@@ -11,6 +11,7 @@
 #include "buzzer.h"
 #include "digitalOutput.h"
 #include "menu.h"
+#include "eeprom_config.h"
 
 void run();
 void write_config();
@@ -82,6 +83,7 @@ PROGMEM const prog_char str_flash_delay[]  = "Flash delay";
 PROGMEM const prog_char str_flash_delay2[] = "Flash delay [ms]";
 PROGMEM const prog_char str_start_delay[]  = "Start delay";
 PROGMEM const prog_char str_start_delay2[] = "Start delay [s]";
+PROGMEM const prog_char str_lcd_backlight[]  = "LCD backlight";
 
 PROGMEM const prog_char str_ok[] = "OK";
 PROGMEM const prog_char str_waiting[] = "Waiting... ";
@@ -125,16 +127,10 @@ digitalOutput output_2_5v(OUTPUT_2_5V_PIN);
 digitalOutput output_3_5v(OUTPUT_3_5V_PIN);
 
 
-struct configuration {
-    int flash_delay;
-    int start_delay;
-    uint8_t mode;
-};
-
-struct configuration config;
-
+// for PROGMEM strings
 char buffer[30];
 
+// menu
 menuCore menu;
 menuRun menu_start(str_start, run);
 subMenu menu_mode(str_mode);
@@ -146,18 +142,9 @@ subMenu menu_mode(str_mode);
 subMenu menu_settings(str_settings);
   enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
+  enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight);
 
 menuRun save_defaults(str_save_defaults, write_config);
-
-// TODO
-void read_config() {
-
-}
-
-// TODO
-void write_config() {
-
-}
 
 // wait for an event and fire a flash
 void run() {
@@ -233,7 +220,7 @@ void run() {
 
     delay(500);
 
-    lcd.set_backlight(63);
+    lcd.set_backlight(config.backlight);
     // turn on light
     socket.off();
 }
@@ -243,7 +230,7 @@ void setup() {
     read_config();
 
     lcd.begin(20, 4);
-    lcd.begin_backlight(LCD_LED_PIN, 63);
+    lcd.begin_backlight(LCD_LED_PIN, config.backlight);
 
     buttons_reader.add_button(button_up);
     buttons_reader.add_button(button_down);
@@ -254,8 +241,6 @@ void setup() {
     buttons_reader.add_button(button_rc2);
     buttons_reader.add_button(rotary_button);
 
-    config.mode = MODE_SOUND;
-    
     menu.attach_display(lcd);
 
     menu.append(menu_start);
@@ -270,6 +255,7 @@ void setup() {
 
     menu_settings.append(flash_delay);
     menu_settings.append(start_delay);
+    menu_settings.append(lcd_backlight);
     
     menu.print();
 
