@@ -6,6 +6,8 @@ struct configuration {
     int backlight;
     int flash_delay;
     int start_delay;
+    int timelapse_delay;
+    uint8_t camera_bulb;
 };
 
 extern struct configuration config;

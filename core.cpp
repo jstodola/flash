@@ -12,8 +12,11 @@
 #include "digitalOutput.h"
 #include "menu.h"
 #include "eeprom_config.h"
+#include "timer.h"
 
 void run();
+void run_sensor();
+void run_timelapse();
 void write_config();
 void read_config();
 
@@ -61,10 +64,11 @@ const uint8_t OUTPUT_2_5V_PIN  = 48;
 const uint8_t OUTPUT_3_5V_PIN  = 50;
 
 
-const uint8_t MODE_SOUND    = 1;
-const uint8_t MODE_LIGHT    = 2;
-const uint8_t MODE_PRESSURE = 3;
-const uint8_t MODE_IR       = 4;
+const uint8_t MODE_SOUND     = 1;
+const uint8_t MODE_LIGHT     = 2;
+const uint8_t MODE_PRESSURE  = 3;
+const uint8_t MODE_IR        = 4;
+const uint8_t MODE_TIMELAPSE = 5;
 
 // strings in program memory
 PROGMEM const prog_char str_start[] = "Start";
@@ -73,21 +77,27 @@ PROGMEM const prog_char str_settings[] = "Settings...";
 PROGMEM const prog_char str_save_defaults[] = "Save as default";
 
 // mode
-PROGMEM const prog_char str_mode_sound[]    = "Sound (microphone)";
-PROGMEM const prog_char str_mode_light[]    = "Light";
-PROGMEM const prog_char str_mode_pressure[] = "Pressure (piezo)";
-PROGMEM const prog_char str_mode_ir[]       = "IR (Infrared)";
+PROGMEM const prog_char str_mode_sound[]     = "Sound (microphone)";
+PROGMEM const prog_char str_mode_light[]     = "Light";
+PROGMEM const prog_char str_mode_pressure[]  = "Pressure (piezo)";
+PROGMEM const prog_char str_mode_ir[]        = "IR (Infrared)";
+PROGMEM const prog_char str_mode_timelapse[] = "Time-lapse";
 
 // settings
 PROGMEM const prog_char str_flash_delay[]  = "Flash delay";
 PROGMEM const prog_char str_flash_delay2[] = "Flash delay [ms]";
 PROGMEM const prog_char str_start_delay[]  = "Start delay";
 PROGMEM const prog_char str_start_delay2[] = "Start delay [s]";
-PROGMEM const prog_char str_lcd_backlight[]  = "LCD backlight";
+PROGMEM const prog_char str_lcd_backlight[] = "LCD backlight";
+PROGMEM const prog_char str_camera_bulb[]  = "Camera - bulb";
+PROGMEM const prog_char str_camera_bulb2[] = "Is time set to bulb?";
+PROGMEM const prog_char str_timelapse_delay[]  = "Time-lapse interval";
+PROGMEM const prog_char str_timelapse_delay2[] = "Set interval [s]";
 
 PROGMEM const prog_char str_ok[] = "OK";
 PROGMEM const prog_char str_waiting[] = "Waiting... ";
 PROGMEM const prog_char str_calibrating_sensor[] = "Calibrating sensor...";
+PROGMEM const prog_char str_picture[] = "Picture: ";
 
 
 display lcd(LCD_RS_PIN, LCD_ENABLE_PIN, LCD_DB4_PIN, LCD_DB5_PIN, LCD_DB6_PIN, LCD_DB7_PIN);
@@ -138,22 +148,44 @@ subMenu menu_mode(str_mode);
   radioItem mode_light(str_mode_light, &config.mode, MODE_LIGHT);
   radioItem mode_pressure(str_mode_pressure, &config.mode, MODE_PRESSURE);
   radioItem mode_ir(str_mode_ir, &config.mode, MODE_IR);
+  radioItem mode_timelapse(str_mode_timelapse, &config.mode, MODE_TIMELAPSE);
 
 subMenu menu_settings(str_settings);
   enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight);
+  enterNumberItem timelapse_delay(str_timelapse_delay, str_timelapse_delay2, &config.timelapse_delay);
+  yesNoItem camera_bulb(str_camera_bulb, str_camera_bulb2, &config.camera_bulb);
 
 menuRun save_defaults(str_save_defaults, write_config);
 
-// wait for an event and fire a flash
 void run() {
+    switch(config.mode){
+        case MODE_SOUND:
+        case MODE_LIGHT:
+        case MODE_PRESSURE:
+        case MODE_IR:
+            run_sensor();
+            break;
+        case MODE_TIMELAPSE:
+            run_timelapse();
+            break;
+        default:
+            break;
+    }
+}
+
+// wait for an event and fire a flash
+void run_sensor() {
     
     int sensor_max;
     int sensor_min;
     int sensor_value;
+    int last_delay = 0;
+    int curr_delay = 0;
 
     analogSensor *sensor;
+    timer timer;
     
     switch(config.mode) {
         case MODE_SOUND:
@@ -171,13 +203,18 @@ void run() {
         default:
             return;
     }
-    
-    for(int i = 0; i < config.start_delay; i++) {
-        lcd.clear();
-        strcpy_P(buffer, str_waiting);
-        lcd.print(buffer);
-        lcd.print(config.start_delay - i);
-        delay(1000);
+
+    timer.set(config.start_delay * 1000);
+    timer.start();
+    while(timer.is_running()) {
+        curr_delay = timer.remain_seconds();
+        if(curr_delay != last_delay) {
+            lcd.clear();
+            strcpy_P(buffer, str_waiting);
+            lcd.print(buffer);
+            lcd.print(curr_delay);
+            last_delay = curr_delay;
+        }
     }
 
     lcd.clear();
@@ -211,7 +248,7 @@ void run() {
         }
         
         // action canceled by user
-        if(button_rc1.read()) {
+        if(button_rc1.read() || button_ok.read()) {
             break;
         }
     }
@@ -223,6 +260,57 @@ void run() {
     lcd.set_backlight(config.backlight);
     // turn on light
     socket.off();
+}
+
+// wait until time is reached or any
+// button is pressed
+uint8_t wait_or_button(int delay) {
+ 
+    uint8_t button_pressed;
+    timer timer;
+
+    timer.set(delay);
+    timer.start();
+    while(timer.is_running()) {
+        button_pressed = buttons_reader.read();
+        if(button_pressed != IDLE) {
+            return button_pressed;
+        }
+    }
+    return 0;
+}
+
+void run_timelapse() {
+
+    uint8_t button_pressed;
+    uint16_t image_number = 0;
+    uint8_t repeat = 1;
+    timer timer;
+
+    while(repeat) {
+        lcd.clear();
+        strcpy_P(buffer, str_picture);
+        lcd.print(buffer);
+        lcd.print(++image_number);
+
+        camera_1.start();
+        if(config.camera_bulb) {
+            button_pressed = wait_or_button(config.timelapse_delay * 1000);
+            camera_1.stop();
+            if(button_pressed) {
+                repeat = 0;
+            } 
+            delay(200);
+        } else {
+            wait_or_button(50);
+            //delay(50);
+            camera_1.stop();
+            button_pressed = wait_or_button(config.timelapse_delay * 1000);
+            if(button_pressed) {
+                repeat = 0;
+            }
+        }
+    }
 }
 
 void setup() {
@@ -252,10 +340,13 @@ void setup() {
     menu_mode.append(mode_light);
     menu_mode.append(mode_pressure);
     menu_mode.append(mode_ir);
+    menu_mode.append(mode_timelapse);
 
     menu_settings.append(flash_delay);
     menu_settings.append(start_delay);
     menu_settings.append(lcd_backlight);
+    menu_settings.append(camera_bulb);
+    menu_settings.append(timelapse_delay);
     
     menu.print();
 
