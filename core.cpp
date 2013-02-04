@@ -370,8 +370,7 @@ void loop() {
     
     if(button_pressed == RC1) {
         run();
-    }
-    if(button_pressed) {
+    } else if(button_pressed) {
         menu.action(button_pressed);
     }
 }
