@@ -19,6 +19,7 @@ void run_sensor();
 void run_timelapse();
 void write_config();
 void read_config();
+uint8_t wait_or_button(int delay);
 
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
@@ -181,8 +182,6 @@ void run_sensor() {
     int sensor_max;
     int sensor_min;
     int sensor_value;
-    int last_delay = 0;
-    int curr_delay = 0;
 
     analogSensor *sensor;
     timer timer;
@@ -204,17 +203,9 @@ void run_sensor() {
             return;
     }
 
-    timer.set(config.start_delay * 1000);
-    timer.start();
-    while(timer.is_running()) {
-        curr_delay = timer.remain_seconds();
-        if(curr_delay != last_delay) {
-            lcd.clear();
-            strcpy_P(buffer, str_waiting);
-            lcd.print(buffer);
-            lcd.print(curr_delay);
-            last_delay = curr_delay;
-        }
+    lcd.clear();
+    if(wait_or_button(config.start_delay * 1000)) {
+        return;
     }
 
     lcd.clear();
@@ -268,13 +259,31 @@ uint8_t wait_or_button(int delay) {
  
     uint8_t button_pressed;
     timer timer;
+    int current_remaining;
+    int last_remaining = 0;
 
     timer.set(delay);
     timer.start();
+    button_pressed = buttons_reader.read();
+    if(button_pressed != IDLE) {
+        return button_pressed;
+    }
     while(timer.is_running()) {
         button_pressed = buttons_reader.read();
         if(button_pressed != IDLE) {
             return button_pressed;
+        }
+        current_remaining = timer.remain_seconds();
+        if(current_remaining != last_remaining) {
+            lcd.setCursor(0, lcd.get_rows() - 1);
+            for(uint8_t i = 0; i < lcd.get_columns(); i++) {
+                lcd.print(" ");
+            }
+            lcd.setCursor(0, lcd.get_rows() - 1);
+            strcpy_P(buffer, str_waiting);
+            lcd.print(buffer);
+            lcd.print(current_remaining);
+            last_remaining = current_remaining;
         }
     }
     return 0;
@@ -293,22 +302,24 @@ void run_timelapse() {
         lcd.print(buffer);
         lcd.print(++image_number);
 
+        if(wait_or_button(200)) {
+            repeat = 0;
+        } 
+
         camera_1.start();
+        
+        wait_or_button(50);
+        
         if(config.camera_bulb) {
             button_pressed = wait_or_button(config.timelapse_delay * 1000);
             camera_1.stop();
-            if(button_pressed) {
-                repeat = 0;
-            } 
-            delay(200);
         } else {
-            wait_or_button(50);
-            //delay(50);
             camera_1.stop();
             button_pressed = wait_or_button(config.timelapse_delay * 1000);
-            if(button_pressed) {
-                repeat = 0;
-            }
+        }
+        
+        if(button_pressed) {
+            repeat = 0;
         }
     }
 }
