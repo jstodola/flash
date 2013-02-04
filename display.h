@@ -11,10 +11,13 @@ class display : public LiquidCrystal {
     void set_backlight(uint8_t value);
     uint8_t get_columns();
     uint8_t get_rows();
+    void set_backlight_on();
+    void set_backlight_off();
   private:
-    uint8_t backlight_pin;
-    uint8_t num_columns;
-    uint8_t num_rows;
+    uint8_t _backlight_pin;
+    uint8_t _num_columns;
+    uint8_t _num_rows;
+    uint8_t _backlight_level;
 };
 
 #endif

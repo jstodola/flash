@@ -233,7 +233,7 @@ void run_sensor() {
     delay(1000);
 
     // turn off display
-    lcd.set_backlight(0);
+    lcd.set_backlight_off();
     
     camera_1.start();
 
@@ -257,7 +257,7 @@ void run_sensor() {
 
     delay(500);
 
-    lcd.set_backlight(config.backlight);
+    lcd.set_backlight_on();
     // turn on light
     socket.off();
 }
