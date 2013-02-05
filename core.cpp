@@ -20,7 +20,12 @@ void run_timelapse();
 void write_config();
 void read_config();
 uint8_t wait_or_button(int delay);
-
+void measure_sensor(analogSensor &sensor);
+void measure_sound();
+void measure_light();
+void measure_pressure();
+void measure_ir();
+ 
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
 const uint8_t LCD_ENABLE_PIN = 25;
@@ -75,6 +80,7 @@ const uint8_t MODE_TIMELAPSE = 5;
 PROGMEM const prog_char str_start[] = "Start";
 PROGMEM const prog_char str_mode[] = "Mode...";
 PROGMEM const prog_char str_settings[] = "Settings...";
+PROGMEM const prog_char str_tools[] = "Tools...";
 PROGMEM const prog_char str_save_defaults[] = "Save as default";
 
 // mode
@@ -95,10 +101,20 @@ PROGMEM const prog_char str_camera_bulb2[] = "Is time set to bulb?";
 PROGMEM const prog_char str_timelapse_delay[]  = "Time-lapse interval";
 PROGMEM const prog_char str_timelapse_delay2[] = "Set interval [s]";
 
+// tools
+PROGMEM const prog_char str_measure_sound[] = "Measure sound";
+PROGMEM const prog_char str_measure_light[] = "Measure light";
+PROGMEM const prog_char str_measure_pressure[] = "Measure pressure";
+PROGMEM const prog_char str_measure_ir[] = "Measure IR";
+
+
 PROGMEM const prog_char str_ok[] = "OK";
 PROGMEM const prog_char str_waiting[] = "Waiting... ";
-PROGMEM const prog_char str_calibrating_sensor[] = "Calibrating sensor...";
+PROGMEM const prog_char str_calibrating_sensor[] = "Calibrating...";
 PROGMEM const prog_char str_picture[] = "Picture: ";
+PROGMEM const prog_char str_minimal[] = "Minimal: ";
+PROGMEM const prog_char str_maximal[] = "Maximal: ";
+PROGMEM const prog_char str_current[] = "Current: ";
 
 
 display lcd(LCD_RS_PIN, LCD_ENABLE_PIN, LCD_DB4_PIN, LCD_DB5_PIN, LCD_DB6_PIN, LCD_DB7_PIN);
@@ -157,6 +173,12 @@ subMenu menu_settings(str_settings);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight);
   enterNumberItem timelapse_delay(str_timelapse_delay, str_timelapse_delay2, &config.timelapse_delay);
   yesNoItem camera_bulb(str_camera_bulb, str_camera_bulb2, &config.camera_bulb);
+
+subMenu menu_tools(str_tools);
+  menuRun tools_measure_sound(str_measure_sound, measure_sound);
+  menuRun tools_measure_light(str_measure_light, measure_light);
+  menuRun tools_measure_pressure(str_measure_pressure, measure_pressure);
+  menuRun tools_measure_ir(str_measure_ir, measure_ir);
 
 menuRun save_defaults(str_save_defaults, write_config);
 
@@ -324,6 +346,62 @@ void run_timelapse() {
     }
 }
 
+void measure_sensor(analogSensor &sensor) {
+
+    int minimal, maximal, current;
+
+    current = sensor.get_value();
+    minimal = current;
+    maximal = current;
+
+    while(1) {
+        current = sensor.get_value();
+        if(current < minimal) {
+            minimal = current;
+        }
+        if(current > maximal) {
+            maximal = current;
+        }
+        if(millis() % 100 == 0) {  // refresh every 100 ms
+            lcd.clear();
+            
+            lcd.setCursor(0, 1);
+            strcpy_P(buffer, str_current);
+            lcd.print(buffer);
+            lcd.print(current);
+
+            lcd.setCursor(0, 2);
+            strcpy_P(buffer, str_minimal);
+            lcd.print(buffer);
+            lcd.print(minimal);
+
+            lcd.setCursor(0, 3);
+            strcpy_P(buffer, str_maximal);
+            lcd.print(buffer);
+            lcd.print(maximal);
+        } 
+        if(buttons_reader.read() != IDLE) {
+            return;
+        }
+    }
+}
+
+void measure_sound() {
+    measure_sensor(sound_sensor);
+}
+
+void measure_light() {
+    measure_sensor(light_sensor);
+}
+
+void measure_pressure() {
+    measure_sensor(pressure_sensor);
+}
+
+void measure_ir() {
+    measure_sensor(ir_sensor);
+}
+
 void setup() {
 
     read_config();
@@ -344,23 +422,25 @@ void setup() {
 
     menu.append(menu_start);
     menu.append(menu_mode);
+        menu_mode.append(mode_sound);
+        menu_mode.append(mode_light);
+        menu_mode.append(mode_pressure);
+        menu_mode.append(mode_ir);
+        menu_mode.append(mode_timelapse);
     menu.append(menu_settings);
+        menu_settings.append(flash_delay);
+        menu_settings.append(start_delay);
+        menu_settings.append(lcd_backlight);
+        menu_settings.append(camera_bulb);
+        menu_settings.append(timelapse_delay);
+    menu.append(menu_tools);
+        menu_tools.append(tools_measure_sound);
+        menu_tools.append(tools_measure_light);
+        menu_tools.append(tools_measure_pressure);
+        menu_tools.append(tools_measure_ir);
     menu.append(save_defaults);
     
-    menu_mode.append(mode_sound);
-    menu_mode.append(mode_light);
-    menu_mode.append(mode_pressure);
-    menu_mode.append(mode_ir);
-    menu_mode.append(mode_timelapse);
-
-    menu_settings.append(flash_delay);
-    menu_settings.append(start_delay);
-    menu_settings.append(lcd_backlight);
-    menu_settings.append(camera_bulb);
-    menu_settings.append(timelapse_delay);
-    
     menu.print();
-
 }
 
 void loop() {
