@@ -23,6 +23,10 @@ void display::set_backlight(uint8_t backlight_level) {
     analogWrite(_backlight_pin, _backlight_level);
 }
 
+uint8_t display::get_backlight() {
+    return _backlight_level;
+}
+
 uint8_t display::get_columns() {
     return _num_columns;
 }

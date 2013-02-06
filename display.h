@@ -9,6 +9,7 @@ class display : public LiquidCrystal {
     void begin(uint8_t cols, uint8_t lines);
     void begin_backlight(uint8_t backlight_pin, uint8_t value);
     void set_backlight(uint8_t value);
+    uint8_t get_backlight();
     uint8_t get_columns();
     uint8_t get_rows();
     void set_backlight_on();
