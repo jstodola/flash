@@ -25,6 +25,7 @@ void measure_sound();
 void measure_light();
 void measure_pressure();
 void measure_ir();
+void set_backlight(int value);
  
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
@@ -170,7 +171,7 @@ subMenu menu_mode(str_mode);
 subMenu menu_settings(str_settings);
   enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
-  enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight);
+  enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight, set_backlight);
   enterNumberItem timelapse_delay(str_timelapse_delay, str_timelapse_delay2, &config.timelapse_delay);
   yesNoItem camera_bulb(str_camera_bulb, str_camera_bulb2, &config.camera_bulb);
 
@@ -344,6 +345,10 @@ void run_timelapse() {
             repeat = 0;
         }
     }
+}
+
+void set_backlight(int value) {
+    lcd.set_backlight(value);
 }
 
 void measure_sensor(analogSensor &sensor) {

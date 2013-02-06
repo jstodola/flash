@@ -11,6 +11,7 @@ PROGMEM const prog_char no_sel[]    = "> NO  <";
 PROGMEM const prog_char no_unsel[]  = "  NO";
 
 typedef void (*callback_function)(void);
+typedef void (*callback_function_int)(int);
 
 class menuItem {
   public:
@@ -43,7 +44,7 @@ class menuLeaf : public menuItem {
 
 class menuRun : public menuLeaf {
   public:
-    menuRun(const prog_char *label,callback_function f);
+    menuRun(const prog_char *label, callback_function f);
     virtual menuItem* do_action();
   private:
     callback_function _f;
@@ -62,11 +63,13 @@ class enterNumberItem : public menuDialog {
   public:
     enterNumberItem(const prog_char *label,
                     const prog_char *question,
-                    int *variable);
+                    int *variable,
+                    callback_function_int f = 0);
     virtual menuItem* do_action();
   private:
     const prog_char *_question;
     int *_variable;
+    callback_function_int _f;
 };
 
 class yesNoItem : public menuDialog {

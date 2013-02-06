@@ -122,8 +122,10 @@ void menuDialog::get_question(char *buffer) {
 // enterNumberItem
 enterNumberItem::enterNumberItem(const prog_char *label,
                                  const prog_char *question,
-                                 int *variable) : menuDialog(label, question) {
+                                 int *variable,
+                                 callback_function_int f) : menuDialog(label, question) {
     _variable = variable;
+    _f = f;
 }
 
 menuItem* enterNumberItem::do_action() {
@@ -154,6 +156,9 @@ menuItem* enterNumberItem::do_action() {
             if(value < 0) {
                 value = 0;
             }
+        }
+        if(_f) {
+            _f(value);
         }
 
     } while(button == UP || button == DOWN);
