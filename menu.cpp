@@ -397,7 +397,7 @@ void menuCore::print() {
             lcd_row = _last_lcd_row - 1;
         }
     } else {    // unknown position
-        lcd_row = min(_last_lcd_row, previous_items);
+        lcd_row = (lcd_rows * previous_items + 1) / (previous_items + next_items + 1);
     }
     
     _lcd->clear();
