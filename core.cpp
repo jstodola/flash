@@ -26,6 +26,7 @@ void measure_light();
 void measure_pressure();
 void measure_ir();
 void set_backlight(int value);
+void testing_shot();
  
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
@@ -107,6 +108,7 @@ PROGMEM const prog_char str_measure_sound[] = "Measure sound";
 PROGMEM const prog_char str_measure_light[] = "Measure light";
 PROGMEM const prog_char str_measure_pressure[] = "Measure pressure";
 PROGMEM const prog_char str_measure_ir[] = "Measure IR";
+PROGMEM const prog_char str_testing_shot[] = "Testing shot";
 
 
 PROGMEM const prog_char str_ok[] = "OK";
@@ -180,6 +182,7 @@ subMenu menu_tools(str_tools);
   menuRun tools_measure_light(str_measure_light, measure_light);
   menuRun tools_measure_pressure(str_measure_pressure, measure_pressure);
   menuRun tools_measure_ir(str_measure_ir, measure_ir);
+  menuRun tools_testing_shot(str_testing_shot, testing_shot);
 
 menuRun save_defaults(str_save_defaults, write_config);
 
@@ -347,6 +350,31 @@ void run_timelapse() {
     }
 }
 
+void testing_shot() {
+    
+    // turn off light
+    socket.on();
+    delay(1000);
+
+    // turn off display
+    lcd.set_backlight_off();
+    
+    camera_1.start();
+
+    wait_or_button(400);
+
+    flash_1.fire();
+
+    camera_1.stop();
+
+    delay(500);
+
+    lcd.set_backlight_on();
+    // turn on light
+    socket.off();
+}
+
+
 void set_backlight(int value) {
     lcd.set_backlight(value);
 }
@@ -439,6 +467,7 @@ void setup() {
         menu_settings.append(camera_bulb);
         menu_settings.append(timelapse_delay);
     menu.append(menu_tools);
+        menu_tools.append(tools_testing_shot);
         menu_tools.append(tools_measure_sound);
         menu_tools.append(tools_measure_light);
         menu_tools.append(tools_measure_pressure);
