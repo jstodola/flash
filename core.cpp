@@ -17,6 +17,7 @@
 void run();
 void run_sensor();
 void run_timelapse();
+void run_testing_shot();
 void write_config();
 void read_config();
 uint8_t wait_or_button(int delay);
@@ -26,7 +27,6 @@ void measure_light();
 void measure_pressure();
 void measure_ir();
 void set_backlight(int value);
-void testing_shot();
  
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
@@ -77,6 +77,7 @@ const uint8_t MODE_LIGHT     = 2;
 const uint8_t MODE_PRESSURE  = 3;
 const uint8_t MODE_IR        = 4;
 const uint8_t MODE_TIMELAPSE = 5;
+const uint8_t MODE_TESTING_SHOT = 6;
 
 // strings in program memory
 PROGMEM const prog_char str_start[] = "Start";
@@ -169,6 +170,7 @@ subMenu menu_mode(str_mode);
   radioItem mode_pressure(str_mode_pressure, &config.mode, MODE_PRESSURE);
   radioItem mode_ir(str_mode_ir, &config.mode, MODE_IR);
   radioItem mode_timelapse(str_mode_timelapse, &config.mode, MODE_TIMELAPSE);
+  radioItem mode_testing_shot(str_testing_shot, &config.mode, MODE_TESTING_SHOT);
 
 subMenu menu_settings(str_settings);
   enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
@@ -182,7 +184,6 @@ subMenu menu_tools(str_tools);
   menuRun tools_measure_light(str_measure_light, measure_light);
   menuRun tools_measure_pressure(str_measure_pressure, measure_pressure);
   menuRun tools_measure_ir(str_measure_ir, measure_ir);
-  menuRun tools_testing_shot(str_testing_shot, testing_shot);
 
 menuRun save_defaults(str_save_defaults, write_config);
 
@@ -196,6 +197,9 @@ void run() {
             break;
         case MODE_TIMELAPSE:
             run_timelapse();
+            break;
+        case MODE_TESTING_SHOT:
+            run_testing_shot();
             break;
         default:
             break;
@@ -350,7 +354,7 @@ void run_timelapse() {
     }
 }
 
-void testing_shot() {
+void run_testing_shot() {
     
     // turn off light
     socket.on();
@@ -460,6 +464,7 @@ void setup() {
         menu_mode.append(mode_pressure);
         menu_mode.append(mode_ir);
         menu_mode.append(mode_timelapse);
+        menu_mode.append(mode_testing_shot);
     menu.append(menu_settings);
         menu_settings.append(flash_delay);
         menu_settings.append(start_delay);
@@ -467,7 +472,6 @@ void setup() {
         menu_settings.append(camera_bulb);
         menu_settings.append(timelapse_delay);
     menu.append(menu_tools);
-        menu_tools.append(tools_testing_shot);
         menu_tools.append(tools_measure_sound);
         menu_tools.append(tools_measure_light);
         menu_tools.append(tools_measure_pressure);
