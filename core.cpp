@@ -81,9 +81,9 @@ const uint8_t MODE_TESTING_SHOT = 6;
 
 // strings in program memory
 PROGMEM const prog_char str_start[] = "Start";
-PROGMEM const prog_char str_mode[] = "Mode...";
-PROGMEM const prog_char str_settings[] = "Settings...";
-PROGMEM const prog_char str_tools[] = "Tools...";
+PROGMEM const prog_char str_mode[] = "Mode";
+PROGMEM const prog_char str_settings[] = "Settings";
+PROGMEM const prog_char str_tools[] = "Tools";
 PROGMEM const prog_char str_save_defaults[] = "Save as default";
 
 // mode

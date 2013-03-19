@@ -123,9 +123,11 @@ void menuDialog::get_question(char *buffer) {
 enterNumberItem::enterNumberItem(const prog_char *label,
                                  const prog_char *question,
                                  int *variable,
-                                 callback_function_int f) : menuDialog(label, question) {
+                                 callback_function_int f,
+                                 int step) : menuDialog(label, question) {
     _variable = variable;
     _f = f;
+    _step = step;
 }
 
 menuItem* enterNumberItem::do_action() {
@@ -150,9 +152,9 @@ menuItem* enterNumberItem::do_action() {
         } while(button == IDLE);
 
         if(button == UP) {
-            value++;
+            value += _step;
         } else if(button == DOWN) {
-            value--;
+            value -= _step;
             if(value < 0) {
                 value = 0;
             }
@@ -278,7 +280,24 @@ subMenu::subMenu(const prog_char *label) : menuItem(label) {
     _last = 0;
 }
 
+void subMenu::get_label(char *buffer) {
+
+    uint8_t i;
+
+    menuItem::get_label(buffer);
+
+    i = 0;
+    while(buffer[i] != 0) {
+        i++;
+    }
+    buffer[i] = '.';
+    buffer[i + 1] = '.';
+    buffer[i + 2] = '.';
+    buffer[i + 3] = 0;
+}
+
 void subMenu::append(menuItem &new_item) {
+
     new_item.set_parent(this);
     // empty list of items
     if(_last == 0) {

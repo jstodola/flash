@@ -64,12 +64,14 @@ class enterNumberItem : public menuDialog {
     enterNumberItem(const prog_char *label,
                     const prog_char *question,
                     int *variable,
-                    callback_function_int f = 0);
+                    callback_function_int f = 0,
+                    int step = 1);
     virtual menuItem* do_action();
   private:
     const prog_char *_question;
     int *_variable;
     callback_function_int _f;
+    int _step;
 };
 
 class yesNoItem : public menuDialog {
@@ -86,6 +88,7 @@ class yesNoItem : public menuDialog {
 class subMenu : public menuItem {
   public:
     subMenu(const prog_char *label);
+    virtual void get_label(char *buffer);
     virtual void append(menuItem &new_item);
     virtual menuItem* get_first();
     virtual menuItem* do_action();
