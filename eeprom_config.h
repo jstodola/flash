@@ -8,6 +8,7 @@ struct configuration {
     int start_delay;
     int timelapse_delay;
     uint8_t camera_bulb;
+    int sensor_tolerance;
 };
 
 extern struct configuration config;

@@ -103,6 +103,8 @@ PROGMEM const prog_char str_camera_bulb[]  = "Camera - bulb";
 PROGMEM const prog_char str_camera_bulb2[] = "Is time set to bulb?";
 PROGMEM const prog_char str_timelapse_delay[]  = "Time-lapse interval";
 PROGMEM const prog_char str_timelapse_delay2[] = "Set interval [s]";
+PROGMEM const prog_char str_sensor_tolerance[] = "Sensor tolerance";
+PROGMEM const prog_char str_sensor_tolerance2[] = "Sensor tolerance [%]";
 
 // tools
 PROGMEM const prog_char str_measure_sound[] = "Measure sound";
@@ -177,6 +179,7 @@ subMenu menu_settings(str_settings);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight, set_backlight);
   enterNumberItem timelapse_delay(str_timelapse_delay, str_timelapse_delay2, &config.timelapse_delay);
+  enterNumberItem sensor_tolerance(str_sensor_tolerance, str_sensor_tolerance2, &config.sensor_tolerance);
   yesNoItem camera_bulb(str_camera_bulb, str_camera_bulb2, &config.camera_bulb);
 
 subMenu menu_tools(str_tools);
@@ -212,6 +215,7 @@ void run_sensor() {
     int sensor_max;
     int sensor_min;
     int sensor_value;
+    uint8_t is_light_sensor = 0;
 
     analogSensor *sensor;
     timer timer;
@@ -222,12 +226,14 @@ void run_sensor() {
             break;
         case MODE_LIGHT:
             sensor = &light_sensor;
+            is_light_sensor = 1;
             break;
         case MODE_PRESSURE:
             sensor = &pressure_sensor;
             break;
         case MODE_IR:
             sensor = &ir_sensor;
+            is_light_sensor = 1;
             break;
         default:
             return;
@@ -238,25 +244,42 @@ void run_sensor() {
         return;
     }
 
-    lcd.clear();
-    strcpy_P(buffer, str_calibrating_sensor);
-    lcd.print(buffer);
-    
-    sensor->calibrate(1000);
-    sensor_min = sensor->get_minimal();
-    sensor_max = sensor->get_maximal();
-    
-    strcpy_P(buffer, str_ok);
-    lcd.print(buffer);
-    
-    // turn off light
-    socket.on();
-    delay(1000);
+    if(is_light_sensor) {
 
-    // turn off display
-    lcd.set_backlight_off();
-    
+        // turn off light
+        socket.on();
+        delay(1000);
+
+        // turn off display
+        lcd.set_backlight_off();
+
+        sensor->calibrate(1000, config.sensor_tolerance);
+        sensor_min = sensor->get_minimal();
+        sensor_max = sensor->get_maximal();
+
+    } else{ 
+
+        lcd.clear();
+        strcpy_P(buffer, str_calibrating_sensor);
+        lcd.print(buffer);
+        
+        sensor->calibrate(1000, config.sensor_tolerance);
+        sensor_min = sensor->get_minimal();
+        sensor_max = sensor->get_maximal();
+        
+        strcpy_P(buffer, str_ok);
+        lcd.print(buffer);
+        
+        // turn off light
+        socket.on();
+        delay(1000);
+
+        // turn off display
+        lcd.set_backlight_off();
+    }
+
     camera_1.start();
+    delay(100);
 
     while(1) {
         sensor_value = sensor->get_value();
@@ -470,6 +493,7 @@ void setup() {
         menu_settings.append(start_delay);
         menu_settings.append(lcd_backlight);
         menu_settings.append(camera_bulb);
+        menu_settings.append(sensor_tolerance);
         menu_settings.append(timelapse_delay);
     menu.append(menu_tools);
         menu_tools.append(tools_measure_sound);

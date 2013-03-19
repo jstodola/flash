@@ -12,7 +12,7 @@ int analogSensor::get_value() {
     return analogRead(this->pin);
 }
 
-void analogSensor::calibrate(unsigned long delay) {
+void analogSensor::calibrate(unsigned long delay, int tolerance) {
     
     unsigned long start;
     int value;
@@ -30,6 +30,17 @@ void analogSensor::calibrate(unsigned long delay) {
             this->min_value = value;
         }
     } while(start + delay > millis());
+    
+    if(tolerance > 0) {
+        min_value -= (min_value * tolerance) / 100;
+        if(min_value < 0) {
+            min_value = 0;
+        }
+        max_value += (max_value * tolerance) / 100;
+        if(max_value > 1023) {
+            max_value = 1023;
+        }
+    }
 }
 
 int analogSensor::get_minimal() {
