@@ -9,6 +9,7 @@ uint16_t START_DELAY_ADDR = 12; // 2 B
 uint16_t TIMELAPSE_DELAY_ADDR = 14; // 2 B
 uint16_t CAMERA_BULB_ADDR = 16;  // 1 B
 uint16_t SENSOR_TOLERANCE_ADDR = 17;  // 2 B
+uint16_t CALIBRATION_DURATION_ADDR = 19;  // 2 B
 
 struct configuration config;
 
@@ -20,6 +21,7 @@ void read_config() {
     config.timelapse_delay = eeprom_read_word(&TIMELAPSE_DELAY_ADDR);
     config.camera_bulb = eeprom_read_byte((uint8_t *)CAMERA_BULB_ADDR);
     config.sensor_tolerance = eeprom_read_word(&SENSOR_TOLERANCE_ADDR);
+    config.calibration_duration = eeprom_read_word(&CALIBRATION_DURATION_ADDR);
 }
 
 void write_config() {
@@ -30,5 +32,6 @@ void write_config() {
     eeprom_write_word(&TIMELAPSE_DELAY_ADDR, config.timelapse_delay);
     eeprom_write_byte((uint8_t *)CAMERA_BULB_ADDR, config.camera_bulb);
     eeprom_write_word(&SENSOR_TOLERANCE_ADDR, config.sensor_tolerance);
+    eeprom_write_word(&CALIBRATION_DURATION_ADDR, config.calibration_duration);
 }
 

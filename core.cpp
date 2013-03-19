@@ -105,6 +105,8 @@ PROGMEM const prog_char str_timelapse_delay[]  = "Time-lapse interval";
 PROGMEM const prog_char str_timelapse_delay2[] = "Set interval [s]";
 PROGMEM const prog_char str_sensor_tolerance[] = "Sensor tolerance";
 PROGMEM const prog_char str_sensor_tolerance2[] = "Sensor tolerance [%]";
+PROGMEM const prog_char str_calibration_duration[] = "Calibr. duration";
+PROGMEM const prog_char str_calibration_duration2[] = "Calibr.duration [ms]";
 
 // tools
 PROGMEM const prog_char str_measure_sound[] = "Measure sound";
@@ -177,6 +179,7 @@ subMenu menu_mode(str_mode);
 subMenu menu_settings(str_settings);
   enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
+  enterNumberItem calibration_duration(str_calibration_duration, str_calibration_duration2, &config.calibration_duration, 0, 100);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight, set_backlight);
   enterNumberItem timelapse_delay(str_timelapse_delay, str_timelapse_delay2, &config.timelapse_delay);
   enterNumberItem sensor_tolerance(str_sensor_tolerance, str_sensor_tolerance2, &config.sensor_tolerance);
@@ -253,7 +256,7 @@ void run_sensor() {
         // turn off display
         lcd.set_backlight_off();
 
-        sensor->calibrate(1000, config.sensor_tolerance);
+        sensor->calibrate(config.calibration_duration, config.sensor_tolerance);
         sensor_min = sensor->get_minimal();
         sensor_max = sensor->get_maximal();
 
@@ -263,7 +266,7 @@ void run_sensor() {
         strcpy_P(buffer, str_calibrating_sensor);
         lcd.print(buffer);
         
-        sensor->calibrate(1000, config.sensor_tolerance);
+        sensor->calibrate(config.calibration_duration, config.sensor_tolerance);
         sensor_min = sensor->get_minimal();
         sensor_max = sensor->get_maximal();
         
@@ -491,6 +494,7 @@ void setup() {
     menu.append(menu_settings);
         menu_settings.append(flash_delay);
         menu_settings.append(start_delay);
+        menu_settings.append(calibration_duration);
         menu_settings.append(lcd_backlight);
         menu_settings.append(camera_bulb);
         menu_settings.append(sensor_tolerance);

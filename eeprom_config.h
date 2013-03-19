@@ -6,6 +6,7 @@ struct configuration {
     int backlight;
     int flash_delay;
     int start_delay;
+    int calibration_duration;
     int timelapse_delay;
     uint8_t camera_bulb;
     int sensor_tolerance;
