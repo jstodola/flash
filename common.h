@@ -10,4 +10,7 @@ const uint8_t OK    = 5;
 const uint8_t RC1   = 6;
 const uint8_t RC2   = 7;
 
+const uint8_t DETECTS_SOUND = 1;
+const uint8_t DETECTS_LIGHT = 2;
+
 #endif

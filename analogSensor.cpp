@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include "analogSensor.h"
+#include "common.h"
 
-analogSensor::analogSensor(uint8_t pin) {
+analogSensor::analogSensor(uint8_t pin, uint8_t capabilities) {
     pinMode(pin, INPUT);
     this->pin = pin;
     this->min_value = 0;
     this->max_value = 1023;
+    this->capabilities = capabilities;
 }
 
 int analogSensor::get_value() {
@@ -49,4 +51,12 @@ int analogSensor::get_minimal() {
 
 int analogSensor::get_maximal() {
     return this->max_value;
+}
+
+uint8_t analogSensor::is_sound_sensor() {
+    return this->capabilities & DETECTS_SOUND;
+}
+
+uint8_t analogSensor::is_light_sensor() {
+    return this->capabilities & DETECTS_LIGHT;
 }

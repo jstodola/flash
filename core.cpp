@@ -146,10 +146,10 @@ flash flash_2(FLASH_2_PIN);
 flash flash_3(FLASH_3_PIN);
 flash flash_4(FLASH_4_PIN);
 
-analogSensor sound_sensor(SOUND_SENSOR_PIN);
-analogSensor light_sensor(LIGHT_SENSOR_PIN);
-analogSensor pressure_sensor(PRESSURE_SENSOR_PIN);
-analogSensor ir_sensor(IR_SENSOR_PIN);
+analogSensor sound_sensor(SOUND_SENSOR_PIN, DETECTS_SOUND);
+analogSensor light_sensor(LIGHT_SENSOR_PIN, DETECTS_LIGHT);
+analogSensor pressure_sensor(PRESSURE_SENSOR_PIN, DETECTS_SOUND);
+analogSensor ir_sensor(IR_SENSOR_PIN, DETECTS_LIGHT);
 
 buzzer bzzz(BUZZER_PIN);
 
@@ -218,7 +218,6 @@ void run_sensor() {
     int sensor_max;
     int sensor_min;
     int sensor_value;
-    uint8_t is_light_sensor = 0;
 
     analogSensor *sensor;
     timer timer;
@@ -229,14 +228,12 @@ void run_sensor() {
             break;
         case MODE_LIGHT:
             sensor = &light_sensor;
-            is_light_sensor = 1;
             break;
         case MODE_PRESSURE:
             sensor = &pressure_sensor;
             break;
         case MODE_IR:
             sensor = &ir_sensor;
-            is_light_sensor = 1;
             break;
         default:
             return;
@@ -247,7 +244,7 @@ void run_sensor() {
         return;
     }
 
-    if(is_light_sensor) {
+    if(sensor->is_light_sensor()) {
 
         // turn off light
         socket.on();
