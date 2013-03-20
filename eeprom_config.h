@@ -10,6 +10,10 @@ struct configuration {
     int timelapse_delay;
     uint8_t camera_bulb;
     int sensor_tolerance;
+    uint8_t flash_1_enabled;
+    uint8_t flash_2_enabled;
+    uint8_t flash_3_enabled;
+    uint8_t flash_4_enabled;
 };
 
 extern struct configuration config;

@@ -27,6 +27,7 @@ void measure_light();
 void measure_pressure();
 void measure_ir();
 void set_backlight(int value);
+void fire_flashes();
  
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
@@ -94,8 +95,17 @@ PROGMEM const prog_char str_mode_ir[]        = "IR (Infrared)";
 PROGMEM const prog_char str_mode_timelapse[] = "Time-lapse";
 
 // settings
+PROGMEM const prog_char str_flash[]  = "Flash";
 PROGMEM const prog_char str_flash_delay[]  = "Flash delay";
 PROGMEM const prog_char str_flash_delay2[] = "Flash delay [ms]";
+PROGMEM const prog_char str_flash_1_enable[] = "Enable flash 1";
+PROGMEM const prog_char str_flash_1_enable2[] = "Enable flash 1?";
+PROGMEM const prog_char str_flash_2_enable[] = "Enable flash 2";
+PROGMEM const prog_char str_flash_2_enable2[] = "Enable flash 2?";
+PROGMEM const prog_char str_flash_3_enable[] = "Enable flash 3";
+PROGMEM const prog_char str_flash_3_enable2[] = "Enable flash 3?";
+PROGMEM const prog_char str_flash_4_enable[] = "Enable flash 4";
+PROGMEM const prog_char str_flash_4_enable2[] = "Enable flash 4?";
 PROGMEM const prog_char str_start_delay[]  = "Start delay";
 PROGMEM const prog_char str_start_delay2[] = "Start delay [s]";
 PROGMEM const prog_char str_lcd_backlight[] = "LCD backlight";
@@ -177,7 +187,12 @@ subMenu menu_mode(str_mode);
   radioItem mode_testing_shot(str_testing_shot, &config.mode, MODE_TESTING_SHOT);
 
 subMenu menu_settings(str_settings);
-  enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
+  subMenu menu_settings_flash(str_flash);
+    enterNumberItem flash_delay(str_flash_delay, str_flash_delay2, &config.flash_delay);
+    yesNoItem flash_1_enable(str_flash_1_enable, str_flash_1_enable2, &config.flash_1_enabled);
+    yesNoItem flash_2_enable(str_flash_2_enable, str_flash_2_enable2, &config.flash_2_enabled);
+    yesNoItem flash_3_enable(str_flash_3_enable, str_flash_3_enable2, &config.flash_3_enabled);
+    yesNoItem flash_4_enable(str_flash_4_enable, str_flash_4_enable2, &config.flash_4_enabled);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
   enterNumberItem calibration_duration(str_calibration_duration, str_calibration_duration2, &config.calibration_duration, 0, 100);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight, set_backlight);
@@ -210,6 +225,33 @@ void run() {
         default:
             break;
     }
+}
+
+void fire_flashes() {
+
+    if(config.flash_delay) {
+        delay(config.flash_delay);
+    }
+    if(config.flash_1_enabled) {
+        flash_1.fire_start();
+    }
+    if(config.flash_2_enabled) {
+        flash_2.fire_start();
+    }
+    if(config.flash_3_enabled) {
+        flash_3.fire_start();
+    }
+    if(config.flash_4_enabled) {
+        flash_4.fire_start();
+    }
+
+    delay(50);
+
+    flash_1.fire_finish();
+    flash_2.fire_finish();
+    flash_3.fire_finish();
+    flash_4.fire_finish();
+
 }
 
 // wait for an event and fire a flash
@@ -284,10 +326,7 @@ void run_sensor() {
     while(1) {
         sensor_value = sensor->get_value();
         if(sensor_value < sensor_min || sensor_value > sensor_max) {
-            if(config.flash_delay) {
-                delay(config.flash_delay);
-            }
-            flash_1.fire();
+            fire_flashes();
             break;
         }
         
@@ -390,7 +429,7 @@ void run_testing_shot() {
 
     wait_or_button(400);
 
-    flash_1.fire();
+    fire_flashes();
 
     camera_1.stop();
 
@@ -489,7 +528,12 @@ void setup() {
         menu_mode.append(mode_timelapse);
         menu_mode.append(mode_testing_shot);
     menu.append(menu_settings);
-        menu_settings.append(flash_delay);
+        menu_settings.append(menu_settings_flash);
+            menu_settings_flash.append(flash_delay);
+            menu_settings_flash.append(flash_1_enable);
+            menu_settings_flash.append(flash_2_enable);
+            menu_settings_flash.append(flash_3_enable);
+            menu_settings_flash.append(flash_4_enable);
         menu_settings.append(start_delay);
         menu_settings.append(calibration_duration);
         menu_settings.append(lcd_backlight);
