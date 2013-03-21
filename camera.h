@@ -8,7 +8,7 @@ class camera {
     void focus_stop();
     void shutter_start();
     void shutter_stop();
-    void start();
+    void start(int autofocus_time = 0);
     void stop();
   private:
     uint8_t focus_pin;

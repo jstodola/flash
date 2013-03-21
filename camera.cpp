@@ -27,8 +27,11 @@ void camera::shutter_stop() {
     digitalWrite(this->shutter_pin, LOW);
 }
 
-void camera::start() {
+void camera::start(int autofocus_time) {
     focus_start();
+    if(autofocus_time > 0) {
+        delay(autofocus_time);
+    }
     shutter_start();
 }
 
