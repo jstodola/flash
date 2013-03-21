@@ -3,7 +3,7 @@
 #include "eeprom_config.h"
 
 uint16_t MODE_ADDR        = 1;  // 1 B
-uint16_t BACKLIGHT_ADDR   = 5;  // 1 B
+uint16_t BACKLIGHT_ADDR   = 5;  // 2 B
 uint16_t FLASH_DELAY_ADDR = 10; // 2 B
 uint16_t START_DELAY_ADDR = 12; // 2 B
 uint16_t TIMELAPSE_DELAY_ADDR = 14; // 2 B
@@ -14,6 +14,10 @@ uint16_t FLASH_1_ENABLED_ADDR = 21; // 1 B
 uint16_t FLASH_2_ENABLED_ADDR = 22; // 1 B
 uint16_t FLASH_3_ENABLED_ADDR = 23; // 1 B
 uint16_t FLASH_4_ENABLED_ADDR = 24; // 1 B
+uint16_t AUTOFOCUS_TIME_ADDR  = 25; // 2 B
+uint16_t SHUTTER_LAG_ADDR     = 27; // 2 B
+uint16_t CAMERA_1_ENABLED_ADDR = 29; // 1 B
+uint16_t CAMERA_2_ENABLED_ADDR = 30; // 1 B
 
 struct configuration config;
 
@@ -30,6 +34,10 @@ void read_config() {
     config.flash_2_enabled = eeprom_read_byte((uint8_t *)FLASH_2_ENABLED_ADDR);
     config.flash_3_enabled = eeprom_read_byte((uint8_t *)FLASH_3_ENABLED_ADDR);
     config.flash_4_enabled = eeprom_read_byte((uint8_t *)FLASH_4_ENABLED_ADDR);
+    config.autofocus_time = eeprom_read_word(&AUTOFOCUS_TIME_ADDR);
+    config.shutter_lag = eeprom_read_word(&SHUTTER_LAG_ADDR);
+    config.camera_1_enabled = eeprom_read_byte((uint8_t *)CAMERA_1_ENABLED_ADDR);
+    config.camera_2_enabled = eeprom_read_byte((uint8_t *)CAMERA_2_ENABLED_ADDR);
 }
 
 void write_config() {
@@ -45,5 +53,9 @@ void write_config() {
     eeprom_write_byte((uint8_t *)FLASH_2_ENABLED_ADDR, config.flash_2_enabled);
     eeprom_write_byte((uint8_t *)FLASH_3_ENABLED_ADDR, config.flash_3_enabled);
     eeprom_write_byte((uint8_t *)FLASH_4_ENABLED_ADDR, config.flash_4_enabled);
+    eeprom_write_word(&AUTOFOCUS_TIME_ADDR, config.autofocus_time);
+    eeprom_write_word(&SHUTTER_LAG_ADDR, config.shutter_lag);
+    eeprom_write_byte((uint8_t *)CAMERA_1_ENABLED_ADDR, config.camera_1_enabled);
+    eeprom_write_byte((uint8_t *)CAMERA_2_ENABLED_ADDR, config.camera_2_enabled);
 }
 

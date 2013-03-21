@@ -28,6 +28,8 @@ void measure_pressure();
 void measure_ir();
 void set_backlight(int value);
 void fire_flashes();
+void cameras_start();
+void cameras_stop();
  
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
@@ -106,6 +108,15 @@ PROGMEM const prog_char str_flash_3_enable[] = "Enable flash 3";
 PROGMEM const prog_char str_flash_3_enable2[] = "Enable flash 3?";
 PROGMEM const prog_char str_flash_4_enable[] = "Enable flash 4";
 PROGMEM const prog_char str_flash_4_enable2[] = "Enable flash 4?";
+PROGMEM const prog_char str_camera[] = "Camera";
+PROGMEM const prog_char str_autofocus_time[] = "Autofocus time";
+PROGMEM const prog_char str_autofocus_time2[] = "Autofocus time [ms]";
+PROGMEM const prog_char str_shutter_lag[] = "Shutter lag";
+PROGMEM const prog_char str_shutter_lag2[] = "Shutter lag [ms]";
+PROGMEM const prog_char str_camera_1_enable[] = "Enable camera 1";
+PROGMEM const prog_char str_camera_1_enable2[] = "Enable camera 1?";
+PROGMEM const prog_char str_camera_2_enable[] = "Enable camera 2";
+PROGMEM const prog_char str_camera_2_enable2[] = "Enable camera 2?";
 PROGMEM const prog_char str_start_delay[]  = "Start delay";
 PROGMEM const prog_char str_start_delay2[] = "Start delay [s]";
 PROGMEM const prog_char str_lcd_backlight[] = "LCD backlight";
@@ -193,6 +204,11 @@ subMenu menu_settings(str_settings);
     yesNoItem flash_2_enable(str_flash_2_enable, str_flash_2_enable2, &config.flash_2_enabled);
     yesNoItem flash_3_enable(str_flash_3_enable, str_flash_3_enable2, &config.flash_3_enabled);
     yesNoItem flash_4_enable(str_flash_4_enable, str_flash_4_enable2, &config.flash_4_enabled);
+  subMenu menu_settings_camera(str_camera);
+    enterNumberItem autofocus_time(str_autofocus_time, str_autofocus_time2, &config.autofocus_time, 0, 100);
+    enterNumberItem shutter_lag(str_shutter_lag, str_shutter_lag2, &config.shutter_lag, 0, 10);
+    yesNoItem camera_1_enable(str_camera_1_enable, str_camera_1_enable2, &config.camera_1_enabled);
+    yesNoItem camera_2_enable(str_camera_2_enable, str_camera_2_enable2, &config.camera_2_enabled);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
   enterNumberItem calibration_duration(str_calibration_duration, str_calibration_duration2, &config.calibration_duration, 0, 100);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight, set_backlight);
@@ -252,6 +268,32 @@ void fire_flashes() {
     flash_3.fire_finish();
     flash_4.fire_finish();
 
+}
+
+void cameras_start() {
+
+    // focus
+    if(config.camera_1_enabled) {
+        camera_1.focus_start();
+    }
+    if(config.camera_2_enabled) {
+        camera_2.focus_start();
+    }
+    delay(config.autofocus_time);
+ 
+    // shutter
+    if(config.camera_1_enabled) {
+        camera_1.shutter_start();
+    }
+    if(config.camera_2_enabled) {
+        camera_2.shutter_start();
+    }
+    delay(config.shutter_lag);
+}
+
+void cameras_stop() {
+    camera_1.stop();
+    camera_2.stop();
 }
 
 // wait for an event and fire a flash
@@ -320,8 +362,7 @@ void run_sensor() {
         lcd.set_backlight_off();
     }
 
-    camera_1.start();
-    delay(100);
+    cameras_start();
 
     while(1) {
         sensor_value = sensor->get_value();
@@ -336,7 +377,7 @@ void run_sensor() {
         }
     }
 
-    camera_1.stop();
+    cameras_stop();;
 
     delay(500);
 
@@ -398,15 +439,15 @@ void run_timelapse() {
             repeat = 0;
         } 
 
-        camera_1.start();
+        cameras_start();
         
         wait_or_button(50);
         
         if(config.camera_bulb) {
             button_pressed = wait_or_button(config.timelapse_delay * 1000);
-            camera_1.stop();
+            cameras_stop();
         } else {
-            camera_1.stop();
+            cameras_stop();
             button_pressed = wait_or_button(config.timelapse_delay * 1000);
         }
         
@@ -425,13 +466,13 @@ void run_testing_shot() {
     // turn off display
     lcd.set_backlight_off();
     
-    camera_1.start();
+    cameras_start();
 
     wait_or_button(400);
 
     fire_flashes();
 
-    camera_1.stop();
+    cameras_stop();
 
     delay(500);
 
@@ -534,6 +575,11 @@ void setup() {
             menu_settings_flash.append(flash_2_enable);
             menu_settings_flash.append(flash_3_enable);
             menu_settings_flash.append(flash_4_enable);
+        menu_settings.append(menu_settings_camera);
+            menu_settings_camera.append(autofocus_time);
+            menu_settings_camera.append(shutter_lag);
+            menu_settings_camera.append(camera_1_enable);
+            menu_settings_camera.append(camera_2_enable);
         menu_settings.append(start_delay);
         menu_settings.append(calibration_duration);
         menu_settings.append(lcd_backlight);

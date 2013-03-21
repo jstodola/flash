@@ -14,6 +14,10 @@ struct configuration {
     uint8_t flash_2_enabled;
     uint8_t flash_3_enabled;
     uint8_t flash_4_enabled;
+    int autofocus_time;
+    int shutter_lag;
+    uint8_t camera_1_enabled;
+    uint8_t camera_2_enabled;
 };
 
 extern struct configuration config;
