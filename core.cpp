@@ -603,6 +603,7 @@ void loop() {
     
     if(button_pressed == RC1) {
         run();
+        menu.print();   // redraw menu
     } else if(button_pressed) {
         menu.action(button_pressed);
     }
