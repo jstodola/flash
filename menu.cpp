@@ -433,7 +433,7 @@ void menuCore::print() {
 
     // display the current item
     _lcd->setCursor(0, lcd_row);
-    _lcd->print("*");
+    _lcd->print(">");
     _selected_item->get_label(buffer);
     _lcd->print(buffer);
 
