@@ -18,6 +18,7 @@ uint16_t AUTOFOCUS_TIME_ADDR  = 25; // 2 B
 uint16_t SHUTTER_LAG_ADDR     = 27; // 2 B
 uint16_t CAMERA_1_ENABLED_ADDR = 29; // 1 B
 uint16_t CAMERA_2_ENABLED_ADDR = 30; // 1 B
+uint16_t SPEAKER_ENABLED_ADDR = 31; // 1 B
 
 struct configuration config;
 
@@ -38,6 +39,7 @@ void read_config() {
     config.shutter_lag = eeprom_read_word(&SHUTTER_LAG_ADDR);
     config.camera_1_enabled = eeprom_read_byte((uint8_t *)CAMERA_1_ENABLED_ADDR);
     config.camera_2_enabled = eeprom_read_byte((uint8_t *)CAMERA_2_ENABLED_ADDR);
+    config.speaker_enabled = eeprom_read_byte((uint8_t *)SPEAKER_ENABLED_ADDR);
 }
 
 void write_config() {
@@ -57,5 +59,6 @@ void write_config() {
     eeprom_write_word(&SHUTTER_LAG_ADDR, config.shutter_lag);
     eeprom_write_byte((uint8_t *)CAMERA_1_ENABLED_ADDR, config.camera_1_enabled);
     eeprom_write_byte((uint8_t *)CAMERA_2_ENABLED_ADDR, config.camera_2_enabled);
+    eeprom_write_byte((uint8_t *)SPEAKER_ENABLED_ADDR, config.speaker_enabled);
 }
 

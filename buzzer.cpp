@@ -15,3 +15,9 @@ void buzzer::set_value(uint8_t value) {
 uint8_t buzzer::get_value() {
     return this->value;
 }
+
+void buzzer::beep(int length) {
+    digitalWrite(this->pin, HIGH);
+    delay(length);
+    digitalWrite(this->pin, LOW);
+}

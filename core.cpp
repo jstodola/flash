@@ -122,6 +122,8 @@ PROGMEM const prog_char str_camera_2_enable2[] = "Enable camera 2?";
 PROGMEM const prog_char str_start_delay[]  = "Start delay";
 PROGMEM const prog_char str_start_delay2[] = "Start delay [s]";
 PROGMEM const prog_char str_lcd_backlight[] = "LCD backlight";
+PROGMEM const prog_char str_speaker_enable[] = "Enable speaker";
+PROGMEM const prog_char str_speaker_enable2[] = "Enable speaker?";
 PROGMEM const prog_char str_timelapse_delay[]  = "Time-lapse interval";
 PROGMEM const prog_char str_timelapse_delay2[] = "Set interval [s]";
 PROGMEM const prog_char str_sensor_tolerance[] = "Sensor tolerance";
@@ -172,7 +174,7 @@ analogSensor light_sensor(LIGHT_SENSOR_PIN, DETECTS_LIGHT);
 analogSensor pressure_sensor(PRESSURE_SENSOR_PIN, DETECTS_SOUND);
 analogSensor ir_sensor(IR_SENSOR_PIN, DETECTS_LIGHT);
 
-buzzer bzzz(BUZZER_PIN);
+buzzer speaker(BUZZER_PIN);
 
 digitalOutput socket(SOCKET_PIN);
 digitalOutput output_1_12v(OUTPUT_1_12V_PIN);
@@ -212,6 +214,7 @@ subMenu menu_settings(str_settings);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
   enterNumberItem calibration_duration(str_calibration_duration, str_calibration_duration2, &config.calibration_duration, 0, 100);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight, set_backlight);
+  yesNoItem speaker_enable(str_speaker_enable, str_speaker_enable2, &config.speaker_enabled);
   enterNumberItem timelapse_delay(str_timelapse_delay, str_timelapse_delay2, &config.timelapse_delay);
   enterNumberItem sensor_tolerance(str_sensor_tolerance, str_sensor_tolerance2, &config.sensor_tolerance);
   yesNoItem camera_bulb(str_camera_bulb, str_camera_bulb2, &config.camera_bulb);
@@ -488,7 +491,9 @@ void set_backlight(int value) {
 
 void measure_sensor(analogSensor &sensor) {
 
-    int minimal, maximal, current;
+    int minimal, maximal, current, buzzer_frequency;
+    unsigned long last_displayed = 0;
+    unsigned long last_beep = 0;
 
     current = sensor.get_value();
     minimal = current;
@@ -502,7 +507,19 @@ void measure_sensor(analogSensor &sensor) {
         if(current > maximal) {
             maximal = current;
         }
-        if(millis() % 100 == 0) {  // refresh every 100 ms
+        
+        // beep according to intensity of input signal
+        if(config.speaker_enabled && sensor.is_light_sensor()) {
+            // low value - beep 1/s
+            // high value - beep 100/s
+            buzzer_frequency = map(current, 0, 1023, 1, 100);
+            if(millis() - last_beep >= (1000 / buzzer_frequency)) {
+                speaker.beep();
+                last_beep = millis();
+            }
+        }
+        
+        if(millis() - last_displayed >= 100) { // refresh every 100 ms
             lcd.clear();
             
             lcd.setCursor(0, 1);
@@ -519,6 +536,8 @@ void measure_sensor(analogSensor &sensor) {
             strcpy_P(buffer, str_maximal);
             lcd.print(buffer);
             lcd.print(maximal);
+
+            last_displayed = millis();
         } 
         if(buttons_reader.read() != IDLE) {
             return;
@@ -584,6 +603,7 @@ void setup() {
         menu_settings.append(start_delay);
         menu_settings.append(calibration_duration);
         menu_settings.append(lcd_backlight);
+        menu_settings.append(speaker_enable);
         menu_settings.append(sensor_tolerance);
         menu_settings.append(timelapse_delay);
     menu.append(menu_tools);

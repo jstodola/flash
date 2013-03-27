@@ -18,6 +18,7 @@ struct configuration {
     int shutter_lag;
     uint8_t camera_1_enabled;
     uint8_t camera_2_enabled;
+    uint8_t speaker_enabled;
 };
 
 extern struct configuration config;
