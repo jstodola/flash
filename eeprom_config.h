@@ -19,6 +19,22 @@ struct configuration {
     uint8_t camera_1_enabled;
     uint8_t camera_2_enabled;
     uint8_t speaker_enabled;
+    uint8_t drop_1_enabled;
+    uint8_t drop_2_enabled;
+    uint8_t drop_3_enabled;
+    uint8_t drop_4_enabled;
+    int drop_1_delay;
+    int drop_2_delay;
+    int drop_3_delay;
+    int drop_4_delay;
+    int drop_1_duration;
+    int drop_2_duration;
+    int drop_3_duration;
+    int drop_4_duration;
+    int drop_1_port;
+    int drop_2_port;
+    int drop_3_port;
+    int drop_4_port;
 };
 
 extern struct configuration config;

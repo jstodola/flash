@@ -19,6 +19,22 @@ uint16_t SHUTTER_LAG_ADDR     = 27; // 2 B
 uint16_t CAMERA_1_ENABLED_ADDR = 29; // 1 B
 uint16_t CAMERA_2_ENABLED_ADDR = 30; // 1 B
 uint16_t SPEAKER_ENABLED_ADDR = 31; // 1 B
+uint16_t DROP_1_ENABLED_ADDR  = 32; // 1 B
+uint16_t DROP_2_ENABLED_ADDR  = 33; // 1 B
+uint16_t DROP_3_ENABLED_ADDR  = 34; // 1 B
+uint16_t DROP_4_ENABLED_ADDR  = 35; // 1 B
+uint16_t DROP_1_DELAY_ADDR    = 36; // 2 B
+uint16_t DROP_2_DELAY_ADDR    = 38; // 2 B
+uint16_t DROP_3_DELAY_ADDR    = 40; // 2 B
+uint16_t DROP_4_DELAY_ADDR    = 42; // 2 B
+uint16_t DROP_1_DURATION_ADDR = 44; // 2 B
+uint16_t DROP_2_DURATION_ADDR = 46; // 2 B
+uint16_t DROP_3_DURATION_ADDR = 48; // 2 B
+uint16_t DROP_4_DURATION_ADDR = 50; // 2 B
+uint16_t DROP_1_PORT_ADDR     = 52; // 2 B
+uint16_t DROP_2_PORT_ADDR     = 54; // 2 B
+uint16_t DROP_3_PORT_ADDR     = 56; // 2 B
+uint16_t DROP_4_PORT_ADDR     = 58; // 2 B
 
 struct configuration config;
 
@@ -40,6 +56,22 @@ void read_config() {
     config.camera_1_enabled = eeprom_read_byte((uint8_t *)CAMERA_1_ENABLED_ADDR);
     config.camera_2_enabled = eeprom_read_byte((uint8_t *)CAMERA_2_ENABLED_ADDR);
     config.speaker_enabled = eeprom_read_byte((uint8_t *)SPEAKER_ENABLED_ADDR);
+    config.drop_1_enabled = eeprom_read_byte((uint8_t *)DROP_1_ENABLED_ADDR);
+    config.drop_2_enabled = eeprom_read_byte((uint8_t *)DROP_2_ENABLED_ADDR);
+    config.drop_3_enabled = eeprom_read_byte((uint8_t *)DROP_3_ENABLED_ADDR);
+    config.drop_4_enabled = eeprom_read_byte((uint8_t *)DROP_4_ENABLED_ADDR);
+    config.drop_1_delay = eeprom_read_word(&DROP_1_DELAY_ADDR);
+    config.drop_2_delay = eeprom_read_word(&DROP_2_DELAY_ADDR);
+    config.drop_3_delay = eeprom_read_word(&DROP_3_DELAY_ADDR);
+    config.drop_4_delay = eeprom_read_word(&DROP_4_DELAY_ADDR);
+    config.drop_1_duration = eeprom_read_word(&DROP_1_DURATION_ADDR);
+    config.drop_2_duration = eeprom_read_word(&DROP_2_DURATION_ADDR);
+    config.drop_3_duration = eeprom_read_word(&DROP_3_DURATION_ADDR);
+    config.drop_4_duration = eeprom_read_word(&DROP_4_DURATION_ADDR);
+    config.drop_1_port = eeprom_read_word(&DROP_1_PORT_ADDR);
+    config.drop_2_port = eeprom_read_word(&DROP_2_PORT_ADDR);
+    config.drop_3_port = eeprom_read_word(&DROP_3_PORT_ADDR);
+    config.drop_4_port = eeprom_read_word(&DROP_4_PORT_ADDR);
 }
 
 void write_config() {
@@ -60,5 +92,21 @@ void write_config() {
     eeprom_write_byte((uint8_t *)CAMERA_1_ENABLED_ADDR, config.camera_1_enabled);
     eeprom_write_byte((uint8_t *)CAMERA_2_ENABLED_ADDR, config.camera_2_enabled);
     eeprom_write_byte((uint8_t *)SPEAKER_ENABLED_ADDR, config.speaker_enabled);
+    eeprom_write_byte((uint8_t *)DROP_1_ENABLED_ADDR, config.drop_1_enabled);
+    eeprom_write_byte((uint8_t *)DROP_2_ENABLED_ADDR, config.drop_2_enabled);
+    eeprom_write_byte((uint8_t *)DROP_3_ENABLED_ADDR, config.drop_3_enabled);
+    eeprom_write_byte((uint8_t *)DROP_4_ENABLED_ADDR, config.drop_4_enabled);
+    eeprom_write_word(&DROP_1_DELAY_ADDR, config.drop_1_delay);
+    eeprom_write_word(&DROP_2_DELAY_ADDR, config.drop_2_delay);
+    eeprom_write_word(&DROP_3_DELAY_ADDR, config.drop_3_delay);
+    eeprom_write_word(&DROP_4_DELAY_ADDR, config.drop_4_delay);
+    eeprom_write_word(&DROP_1_DURATION_ADDR, config.drop_1_duration);
+    eeprom_write_word(&DROP_2_DURATION_ADDR, config.drop_2_duration);
+    eeprom_write_word(&DROP_3_DURATION_ADDR, config.drop_3_duration);
+    eeprom_write_word(&DROP_4_DURATION_ADDR, config.drop_4_duration);
+    eeprom_write_word(&DROP_1_PORT_ADDR, config.drop_1_port);
+    eeprom_write_word(&DROP_2_PORT_ADDR, config.drop_2_port);
+    eeprom_write_word(&DROP_3_PORT_ADDR, config.drop_3_port);
+    eeprom_write_word(&DROP_4_PORT_ADDR, config.drop_4_port);
 }
 
