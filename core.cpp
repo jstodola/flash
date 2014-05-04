@@ -17,6 +17,7 @@
 void run();
 void run_sensor();
 void run_timelapse();
+void run_drop();
 void run_testing_shot();
 void write_config();
 void read_config();
@@ -27,9 +28,11 @@ void measure_light();
 void measure_pressure();
 void measure_ir();
 void set_backlight(int value);
-void fire_flashes();
+void fire_flashes(int flash_delay = 0);
 void cameras_start();
 void cameras_stop();
+void check_and_open_valve(uint8_t enabled, int count_ms, int drop_delay, int drop_port);
+void check_and_close_valve(uint8_t enabled, int count_ms, int drop_delay, int drop_duration, int drop_port);
  
 const uint8_t LCD_LED_PIN    =  2;
 const uint8_t LCD_RS_PIN     = 23;
@@ -280,6 +283,9 @@ void run() {
         case MODE_TIMELAPSE:
             run_timelapse();
             break;
+        case MODE_DROP:
+            run_drop();
+            break;
         case MODE_TESTING_SHOT:
             run_testing_shot();
             break;
@@ -288,10 +294,10 @@ void run() {
     }
 }
 
-void fire_flashes() {
+void fire_flashes(int flash_delay) {
 
-    if(config.flash_delay) {
-        delay(config.flash_delay);
+    if(flash_delay) {
+        delay(flash_delay);
     }
     if(config.flash_1_enabled) {
         flash_1.fire_start();
@@ -412,7 +418,7 @@ void run_sensor() {
     while(1) {
         sensor_value = sensor->get_value();
         if(sensor_value < sensor_min || sensor_value > sensor_max) {
-            fire_flashes();
+            fire_flashes(config.flash_delay);
             break;
         }
         
@@ -502,6 +508,80 @@ void run_timelapse() {
     }
 }
 
+void check_and_open_valve(uint8_t enabled, int count_ms, int drop_delay, int drop_port) {
+    if(enabled && count_ms == drop_delay) {
+        switch(drop_port) {
+            case 1:
+                output_1_12v.on();
+                break;
+            case 2:
+                output_2_12v.on();
+                break;
+            case 3:
+                output_3_12v.on();
+                break;
+        }
+    }
+}
+
+void check_and_close_valve(uint8_t enabled, int count_ms, int drop_delay, int drop_duration, int drop_port) {
+    if(enabled && count_ms == drop_delay + drop_duration) {
+        switch(drop_port) {
+            case 1:
+                output_1_12v.off();
+                break;
+            case 2:
+                output_2_12v.off();
+                break;
+            case 3:
+                output_3_12v.off();
+                break;
+        }
+    }
+}
+
+void run_drop() {
+
+    int count_ms;
+
+    // turn off light
+    socket.on();
+    delay(1000);
+
+    // turn off display
+    lcd.set_backlight_off();
+
+    cameras_start();
+
+    for(count_ms = 0; count_ms < config.flash_delay; count_ms++) {
+        check_and_open_valve(config.drop_1_enabled, count_ms, config.drop_1_delay, config.drop_1_port);
+        check_and_open_valve(config.drop_2_enabled, count_ms, config.drop_2_delay, config.drop_2_port);
+        check_and_open_valve(config.drop_3_enabled, count_ms, config.drop_3_delay, config.drop_3_port);
+        check_and_open_valve(config.drop_4_enabled, count_ms, config.drop_4_delay, config.drop_4_port);
+
+        check_and_close_valve(config.drop_1_enabled, count_ms, config.drop_1_delay, config.drop_1_duration, config.drop_1_port);
+        check_and_close_valve(config.drop_2_enabled, count_ms, config.drop_2_delay, config.drop_2_duration, config.drop_2_port);
+        check_and_close_valve(config.drop_3_enabled, count_ms, config.drop_3_delay, config.drop_3_duration, config.drop_3_port);
+        check_and_close_valve(config.drop_4_enabled, count_ms, config.drop_4_delay, config.drop_4_duration, config.drop_4_port);
+
+        delay(1);
+    }
+
+    fire_flashes();
+    cameras_stop();
+
+    delay(500);
+    lcd.set_backlight_on();
+
+    //turn on light
+    socket.off();
+
+    // close all valves, just for sure
+    output_1_12v.off();
+    output_2_12v.off();
+    output_3_12v.off();
+}
+
 void run_testing_shot() {
     
     // turn off light
@@ -515,7 +595,7 @@ void run_testing_shot() {
 
     wait_or_button(400);
 
-    fire_flashes();
+    fire_flashes(config.flash_delay);
 
     cameras_stop();
 
