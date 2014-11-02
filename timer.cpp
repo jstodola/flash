@@ -26,7 +26,7 @@ int timer::remain() {
 }
 
 int timer::remain_seconds() {
-    return remain() / 1000;
+    return round(remain() / 1000.0);
 }
 
 uint8_t timer::is_running() {
