@@ -35,6 +35,9 @@ struct configuration {
     int drop_2_port;
     int drop_3_port;
     int drop_4_port;
+    int8_t shutter_speed_shortest_index;
+    int8_t shutter_speed_longest_index;
+    int hdr_shoots;
 };
 
 extern struct configuration config;

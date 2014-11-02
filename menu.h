@@ -74,6 +74,23 @@ class enterNumberItem : public menuDialog {
     int _step;
 };
 
+class enterShutterSpeed : public menuDialog {
+  public:
+    enterShutterSpeed(const prog_char *label,
+                      const prog_char *question,
+                      int8_t *speed_index,
+                      const uint16_t *shutter_speeds,
+                      const uint8_t shutter_speeds_count,
+                      callback_function_int f = 0);
+    virtual menuItem* do_action();
+  private:
+    const prog_char *_question;
+    int8_t *_speed_index;
+    const uint16_t *_shutter_speeds;
+    uint8_t _shutter_speeds_count;
+    callback_function_int _f;
+};
+
 class yesNoItem : public menuDialog {
   public:
     yesNoItem(const prog_char *label,

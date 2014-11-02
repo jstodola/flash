@@ -173,6 +173,68 @@ menuItem* enterNumberItem::do_action() {
     return 0;
 }
 
+// enterShutterSpeed
+enterShutterSpeed::enterShutterSpeed(const prog_char *label,
+                                     const prog_char *question,
+                                     int8_t *speed_index,
+                                     const uint16_t *shutter_speeds,
+                                     const uint8_t shutter_speeds_count,
+                                     callback_function_int f) : menuDialog(label, question) {
+    _speed_index = speed_index;
+    _f = f;
+    _shutter_speeds = shutter_speeds;
+    _shutter_speeds_count = shutter_speeds_count;
+}
+
+menuItem* enterShutterSpeed::do_action() {
+    display *lcd;
+    int8_t speed_index;
+    uint16_t speed;
+    uint8_t button;
+
+    lcd = get_display();
+    get_question(buffer);
+    speed_index = *_speed_index;
+
+    do {
+        lcd->clear();
+        lcd->print(buffer);
+
+        lcd->setCursor(0, 2);
+        if(speed_index < 0) {
+            lcd->print("1/");
+        }
+        speed = _shutter_speeds[abs(speed_index)];
+        lcd->print(speed/10);
+        if(speed%10) {
+            lcd->print(".");
+            lcd->print(speed%10);
+        }
+
+        // wait for some useful key
+        do{
+            button = buttons_reader.read();
+        } while(button == IDLE);
+
+        if(button == UP && speed_index < _shutter_speeds_count - 1) {
+            speed_index++;
+        } else if(button == DOWN && speed_index > 1 - _shutter_speeds_count) {
+            speed_index--;
+        }
+        if(_f) {
+            _f(speed_index);
+        }
+
+    } while(button == UP || button == DOWN);
+
+    // if not "cancel", save value
+    if(button != LEFT) {
+        *_speed_index = speed_index;
+    }
+
+    return 0;
+}
+
 // yesNoItem
 yesNoItem::yesNoItem(const prog_char *label,
                      const prog_char *question,

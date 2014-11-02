@@ -35,6 +35,9 @@ uint16_t DROP_1_PORT_ADDR     = 52; // 2 B
 uint16_t DROP_2_PORT_ADDR     = 54; // 2 B
 uint16_t DROP_3_PORT_ADDR     = 56; // 2 B
 uint16_t DROP_4_PORT_ADDR     = 58; // 2 B
+uint16_t SHUTTER_SPEED_SHORTEST_INDEX_ADDR = 60; // 1 B
+uint16_t SHUTTER_SPEED_LONGEST_INDEX_ADDR  = 61; // 1 B
+uint16_t HDR_SHOOTS_ADDR      = 62; // 2 B
 
 struct configuration config;
 
@@ -72,6 +75,9 @@ void read_config() {
     config.drop_2_port = eeprom_read_word(&DROP_2_PORT_ADDR);
     config.drop_3_port = eeprom_read_word(&DROP_3_PORT_ADDR);
     config.drop_4_port = eeprom_read_word(&DROP_4_PORT_ADDR);
+    config.shutter_speed_shortest_index = eeprom_read_byte((uint8_t *)SHUTTER_SPEED_SHORTEST_INDEX_ADDR);
+    config.shutter_speed_longest_index = eeprom_read_byte((uint8_t *)SHUTTER_SPEED_LONGEST_INDEX_ADDR);
+    config.hdr_shoots = eeprom_read_word(&HDR_SHOOTS_ADDR);
 }
 
 void write_config() {
@@ -108,5 +114,8 @@ void write_config() {
     eeprom_write_word(&DROP_2_PORT_ADDR, config.drop_2_port);
     eeprom_write_word(&DROP_3_PORT_ADDR, config.drop_3_port);
     eeprom_write_word(&DROP_4_PORT_ADDR, config.drop_4_port);
+    eeprom_write_byte((uint8_t *)SHUTTER_SPEED_SHORTEST_INDEX_ADDR, (uint8_t)config.shutter_speed_shortest_index);
+    eeprom_write_byte((uint8_t *)SHUTTER_SPEED_LONGEST_INDEX_ADDR, (uint8_t)config.shutter_speed_longest_index);
+    eeprom_write_word(&HDR_SHOOTS_ADDR, config.hdr_shoots);
 }
 

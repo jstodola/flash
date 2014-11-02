@@ -17,6 +17,7 @@
 void run();
 void run_sensor();
 void run_timelapse();
+void run_hdr();
 void run_drop();
 void run_testing_shot();
 void write_config();
@@ -85,6 +86,7 @@ const uint8_t MODE_IR        = 4;
 const uint8_t MODE_TIMELAPSE = 5;
 const uint8_t MODE_TESTING_SHOT = 6;
 const uint8_t MODE_DROP = 7;
+const uint8_t MODE_HDR  = 8;
 
 // strings in program memory
 PROGMEM const prog_char str_start[] = "Start";
@@ -99,6 +101,7 @@ PROGMEM const prog_char str_mode_light[]     = "Light";
 PROGMEM const prog_char str_mode_pressure[]  = "Pressure (piezo)";
 PROGMEM const prog_char str_mode_ir[]        = "IR (Infrared)";
 PROGMEM const prog_char str_mode_timelapse[] = "Time-lapse";
+PROGMEM const prog_char str_mode_hdr[]       = "HDR";
 PROGMEM const prog_char str_mode_drop[]      = "Drops";
 
 // settings
@@ -153,6 +156,11 @@ PROGMEM const prog_char str_drop_delay2[] = "Delay [ms]";
 PROGMEM const prog_char str_drop_duration[] = "Duration";
 PROGMEM const prog_char str_drop_duration2[] = "Duration [ms]";
 PROGMEM const prog_char str_drop_port[] = "Port number";
+PROGMEM const prog_char str_hdr[] = "HDR";
+PROGMEM const prog_char str_shutter_speed_shortest[] = "Shutter sp. short.";
+PROGMEM const prog_char str_shutter_speed_longest[]  = "Shutter sp. long.";
+PROGMEM const prog_char str_shutter_speed[]   = "Shutter speed [s]";
+PROGMEM const prog_char str_hdr_shoots[]   = "Number of shoots";
 
 // tools
 PROGMEM const prog_char str_measure_sound[] = "Measure sound";
@@ -169,7 +177,14 @@ PROGMEM const prog_char str_picture[] = "Picture: ";
 PROGMEM const prog_char str_minimal[] = "Minimal: ";
 PROGMEM const prog_char str_maximal[] = "Maximal: ";
 PROGMEM const prog_char str_current[] = "Current: ";
+PROGMEM const prog_char str_exposure[] = "Exposure: ";
 
+// shutter speeds * 10
+const uint16_t shutter_speeds[] = {
+               10, 13, 16, 20, 25, 30, 40, 50, 60, 80, 100, 130, 150, 200,
+               250, 300, 400, 500, 600, 800, 1000, 1250, 1600, 2000, 2500, 
+               3200, 4000, 5000, 6400, 8000, 10000, 12500, 16000, 20000, 
+               25000, 32000, 40000};
 
 display lcd(LCD_RS_PIN, LCD_ENABLE_PIN, LCD_DB4_PIN, LCD_DB5_PIN, LCD_DB6_PIN, LCD_DB7_PIN);
 
@@ -220,6 +235,7 @@ subMenu menu_mode(str_mode);
   radioItem mode_pressure(str_mode_pressure, &config.mode, MODE_PRESSURE);
   radioItem mode_ir(str_mode_ir, &config.mode, MODE_IR);
   radioItem mode_timelapse(str_mode_timelapse, &config.mode, MODE_TIMELAPSE);
+  radioItem mode_hdr(str_mode_hdr, &config.mode, MODE_HDR);
   radioItem mode_drop(str_mode_drop, &config.mode, MODE_DROP);
   radioItem mode_testing_shot(str_testing_shot, &config.mode, MODE_TESTING_SHOT);
 
@@ -256,6 +272,10 @@ subMenu menu_settings(str_settings);
       enterNumberItem drop_4_delay(str_drop_delay, str_drop_delay2, &config.drop_4_delay);
       enterNumberItem drop_4_duration(str_drop_duration, str_drop_duration2, &config.drop_4_duration);
       enterNumberItem drop_4_port(str_drop_port, str_drop_port, &config.drop_4_port);
+  subMenu menu_settings_hdr(str_hdr);
+    enterShutterSpeed shutter_speed_shortest(str_shutter_speed_shortest, str_shutter_speed, &config.shutter_speed_shortest_index, shutter_speeds, sizeof(shutter_speeds)/sizeof(shutter_speeds[0]));
+    enterShutterSpeed shutter_speed_longest(str_shutter_speed_longest, str_shutter_speed, &config.shutter_speed_longest_index, shutter_speeds, sizeof(shutter_speeds)/sizeof(shutter_speeds[0]));
+    enterNumberItem hdr_shoots(str_hdr_shoots, str_hdr_shoots, &config.hdr_shoots);
   enterNumberItem start_delay(str_start_delay, str_start_delay2, &config.start_delay);
   enterNumberItem calibration_duration(str_calibration_duration, str_calibration_duration2, &config.calibration_duration, 0, 100);
   enterNumberItem lcd_backlight(str_lcd_backlight, str_lcd_backlight, &config.backlight, set_backlight);
@@ -282,6 +302,9 @@ void run() {
             break;
         case MODE_TIMELAPSE:
             run_timelapse();
+            break;
+        case MODE_HDR:
+            run_hdr();
             break;
         case MODE_DROP:
             run_drop();
@@ -508,6 +531,47 @@ void run_timelapse() {
     }
 }
 
+void run_hdr() {
+
+    // in seconds
+    double shortest = shutter_index_to_seconds(config.shutter_speed_shortest_index, shutter_speeds);
+    double longest = shutter_index_to_seconds(config.shutter_speed_longest_index, shutter_speeds);
+    double delay_time;
+
+    uint8_t button_pressed;
+
+    // take at least two pictures
+    if(config.hdr_shoots < 2) {
+        return;
+    }
+
+    for(uint8_t cycle=0; cycle<config.hdr_shoots; cycle++){
+
+        delay_time = pow(2, (log2(shortest) + ((cycle * (log2(longest) - log2(shortest))) / (config.hdr_shoots - 1))));
+
+        lcd.clear();
+        strcpy_P(buffer, str_picture);
+        lcd.print(buffer);
+        lcd.print(cycle + 1);
+        lcd.setCursor(0, 1);
+        strcpy_P(buffer, str_exposure);
+        lcd.print(buffer);
+        lcd.print(round(delay_time * 1000));
+        lcd.print(F(" ms"));
+
+        cameras_start();
+        button_pressed = wait_or_button(delay_time * 1000);
+        cameras_stop();
+
+        // delay between shoots
+        button_pressed += wait_or_button(500);
+
+        if(button_pressed) {
+            break;
+        }
+    }
+}
+
 void check_and_open_valve(uint8_t enabled, int count_ms, int drop_delay, int drop_port) {
     if(enabled && count_ms == drop_delay) {
         switch(drop_port) {
@@ -708,6 +772,7 @@ void setup() {
         menu_mode.append(mode_pressure);
         menu_mode.append(mode_ir);
         menu_mode.append(mode_timelapse);
+        menu_mode.append(mode_hdr);
         menu_mode.append(mode_drop);
         menu_mode.append(mode_testing_shot);
     menu.append(menu_settings);
@@ -744,6 +809,10 @@ void setup() {
                 menu_settings_drop_4.append(drop_4_delay);
                 menu_settings_drop_4.append(drop_4_duration);
                 menu_settings_drop_4.append(drop_4_port);
+        menu_settings.append(menu_settings_hdr);
+            menu_settings_hdr.append(shutter_speed_shortest);
+            menu_settings_hdr.append(shutter_speed_longest);
+            menu_settings_hdr.append(hdr_shoots);
         menu_settings.append(start_delay);
         menu_settings.append(calibration_duration);
         menu_settings.append(lcd_backlight);
