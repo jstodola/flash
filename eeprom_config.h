@@ -7,7 +7,7 @@ struct configuration {
     int flash_delay;
     int start_delay;
     int calibration_duration;
-    int timelapse_delay;
+    int timelapse_interval;
     uint8_t camera_bulb;
     int sensor_tolerance;
     uint8_t flash_1_enabled;
@@ -44,5 +44,6 @@ extern struct configuration config;
 
 void read_config();
 void write_config();
+void initialize_eeprom();
 
 #endif

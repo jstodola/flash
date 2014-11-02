@@ -15,6 +15,16 @@ const uint8_t RC2   = 7;
 const uint8_t DETECTS_SOUND = 1;
 const uint8_t DETECTS_LIGHT = 2;
 
+// mode of operation
+const uint8_t MODE_SOUND     = 1;
+const uint8_t MODE_LIGHT     = 2;
+const uint8_t MODE_PRESSURE  = 3;
+const uint8_t MODE_IR        = 4;
+const uint8_t MODE_TIMELAPSE = 5;
+const uint8_t MODE_TESTING_SHOT = 6;
+const uint8_t MODE_DROP = 7;
+const uint8_t MODE_HDR  = 8;
+
 double log2(double x);
 double shutter_index_to_seconds(int8_t speed_index, const uint16_t *shutter_speeds);
 
