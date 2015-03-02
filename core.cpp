@@ -469,6 +469,11 @@ void run_drop() {
         delay(1);
     }
 
+    // close all valves, just for sure
+    output_1_12v.off();
+    output_2_12v.off();
+    output_3_12v.off();
+
     fire_flashes();
     cameras_stop();
 
@@ -477,11 +482,6 @@ void run_drop() {
 
     //turn on light
     socket.off();
-
-    // close all valves, just for sure
-    output_1_12v.off();
-    output_2_12v.off();
-    output_3_12v.off();
 }
 
 void run_testing_shot() {
