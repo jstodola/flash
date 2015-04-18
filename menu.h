@@ -52,11 +52,17 @@ class menuRun : public menuLeaf {
 
 class menuDialog : public menuLeaf {
   public:
-    menuDialog(const prog_char *label, const prog_char *question);
+    menuDialog(const prog_char *label,
+               const prog_char *question,
+               callback_function f_start = 0,
+               callback_function f_end = 0);
     virtual display* get_display();
     virtual void get_question(char *buffer);
+    virtual menuItem* do_action();
   private:
     const prog_char *_question;
+    callback_function _f_start;
+    callback_function _f_end;
 };
 
 class enterNumberItem : public menuDialog {

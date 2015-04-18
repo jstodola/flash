@@ -96,8 +96,13 @@ menuItem* menuRun::do_action() {
 }
 
 // menuDialog
-menuDialog::menuDialog(const prog_char *label, const prog_char *question) : menuLeaf(label) {
+menuDialog::menuDialog(const prog_char *label,
+                       const prog_char *question, 
+                       callback_function f_start,
+                       callback_function f_end) : menuLeaf(label) {
     _question = question;
+    _f_start = f_start;
+    _f_end = f_end;
 }
 
 display* menuDialog::get_display() {
@@ -117,6 +122,31 @@ display* menuDialog::get_display() {
 
 void menuDialog::get_question(char *buffer) {
     strcpy_P(buffer, _question);
+}
+
+menuItem* menuDialog::do_action() {
+    display *lcd;
+    uint8_t button;
+
+    get_question(buffer);
+
+    if(_f_start != 0) {
+        _f_start();
+    }
+
+    lcd = get_display();
+    lcd->clear();
+    lcd->print(buffer);
+
+    do {
+        button = buttons_reader.read();
+    } while(button == IDLE);
+
+    if(_f_end != 0) {
+        _f_end();
+    }
+
+    return 0;
 }
 
 // enterNumberItem
