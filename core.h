@@ -23,6 +23,8 @@ void cameras_start();
 void cameras_stop();
 void check_and_open_valve(uint8_t enabled, int count_ms, int drop_delay, int drop_port);
 void check_and_close_valve(uint8_t enabled, int count_ms, int drop_delay, int drop_duration, int drop_port);
+void open_valves();
+void close_valves();
 
 //PINs
 const uint8_t LCD_LED_PIN    =  2;
@@ -149,6 +151,8 @@ PROGMEM const prog_char str_measure_light[] = "Measure light";
 PROGMEM const prog_char str_measure_pressure[] = "Measure pressure";
 PROGMEM const prog_char str_measure_ir[] = "Measure IR";
 PROGMEM const prog_char str_testing_shot[] = "Testing shot";
+PROGMEM const prog_char str_open_valves[] = "Open valves";
+PROGMEM const prog_char str_open_valves2[] = "Press any button...";
 
 
 PROGMEM const prog_char str_ok[] = "OK";

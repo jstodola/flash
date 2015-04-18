@@ -128,6 +128,7 @@ subMenu menu_tools(str_tools);
   menuRun tools_measure_light(str_measure_light, measure_light);
   menuRun tools_measure_pressure(str_measure_pressure, measure_pressure);
   menuRun tools_measure_ir(str_measure_ir, measure_ir);
+  menuDialog tools_open_valves(str_open_valves, str_open_valves2, open_valves, close_valves);
 
 
 void run() {
@@ -442,6 +443,18 @@ void check_and_close_valve(uint8_t enabled, int count_ms, int drop_delay, int dr
     }
 }
 
+void open_valves() {
+    output_1_12v.on();
+    output_2_12v.on();
+    output_3_12v.on();
+}
+
+void close_valves() {
+    output_1_12v.off();
+    output_2_12v.off();
+    output_3_12v.off();
+}
+
 void run_drop() {
 
     int count_ms;
@@ -664,6 +677,7 @@ void setup() {
         menu_tools.append(tools_measure_light);
         menu_tools.append(tools_measure_pressure);
         menu_tools.append(tools_measure_ir);
+        menu_tools.append(tools_open_valves);
     
     menu.print();
 }
